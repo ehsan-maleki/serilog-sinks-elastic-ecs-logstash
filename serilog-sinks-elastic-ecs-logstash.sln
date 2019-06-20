@@ -12,9 +12,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emzam.Log.ElkLogProvider", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "resources", "resources", "{7F82EE08-DF4F-42B5-BFB0-13C07658A45A}"
 ProjectSection(SolutionItems) = preProject
-	resources\LICENSE = resources\LICENSE
 	.gitignore = .gitignore
 	README.md = README.md
+	LICENSE = LICENSE
 EndProjectSection
 EndProject
 Global
