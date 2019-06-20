@@ -1,0 +1,57 @@
+# ~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~
+# Welcom API
+#
+GET http://localhost:2010
+Accept: application/json
+
+###
+# ~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~
+# Audit Log Test
+#
+GET http://localhost:2010/audit-log/fake-it
+Accept: application/json
+
+###
+# ~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~
+# Information Log Test
+#
+GET http://localhost:2010/information-log/fake-it
+Accept: application/json
+
+###
+# ~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~
+# Debug Log Test
+#
+GET http://localhost:2010/debug-log/fake-it
+Accept: application/json
+
+###
+# ~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~
+# Warning Log Test
+#
+GET http://localhost:2010/warning-log/fake-it
+Accept: application/json
+
+###
+# ~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~
+# Critical Log Test
+#
+GET http://localhost:2010/critical-log/fake-it
+Accept: application/json
+
+###
+# ~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~
+# Fetal Log Test
+#
+GET http://localhost:2010/fetal-log/fake-it
+Accept: application/json
+
+###
+# ~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~
+# Error Log Test
+#
+GET http://localhost:2010/error-log/fake-it
+Accept: application/json
+
+###
+

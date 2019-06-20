@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8962BF5C-1BEE-4E71-B9B7-584180D74E3A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Serilog</RootNamespace>
+    <AssemblyName>Serilog.Sinks.ElasticEcsLogstash</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
+      <HintPath>..\..\packages\Serilog.2.8.0\lib\net46\Serilog.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Serilog.Sinks.File, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
+      <HintPath>..\..\packages\Serilog.Sinks.File.4.0.0\lib\net45\Serilog.Sinks.File.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Serilog.Sinks.PeriodicBatching, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
+      <HintPath>..\..\packages\Serilog.Sinks.PeriodicBatching.2.2.0\lib\net45\Serilog.Sinks.PeriodicBatching.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Serilog.Sinks.RollingFile, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
+      <HintPath>..\..\packages\Serilog.Sinks.RollingFile.3.3.0\lib\net45\Serilog.Sinks.RollingFile.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Enrichers\Private\Ecs\LogEventToEcsConverter.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\AccountModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\AgentModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\BaseModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\ClientModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\CloudModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\ContainerImageModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\ContainerModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\DestinationModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\DeviceModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\EcsModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\ErrorModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\EventModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\FileModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\GeoLocationModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\GeoModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\GroupModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\HostModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\HttpBodyModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\HttpModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\HttpRequestModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\HttpResponseModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\InstanceModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\LogModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\MachineModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\NetworkModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\ObserverModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\OperatingSystemModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\OrganizationModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\ProcessModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\ServerModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\ServiceModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\SourceModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\ThreadModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\UrlModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\UserAgentModel.cs" />
+    <Compile Include="Enrichers\Private\Ecs\Models\UserModel.cs" />
+    <Compile Include="Enrichers\WithEcsEnricher.cs" />
+    <Compile Include="LoggerEcsEnricherConfigurationExtensions.cs" />
+    <Compile Include="LoggerEcsSinkConfigurationExtensions.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\BatchFormatters\ArrayBatchFormatter.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\BatchFormatters\BatchFormatter.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\BatchFormatters\DefaultBatchFormatter.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\IBatchFormatter.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\IHttpClient.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\Private\IO\DirectoryService.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\Private\IO\IDirectoryService.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\Private\Network\BookmarkFile.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\Private\Network\DateFormats.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\Private\Network\DefaultHttpClient.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\Private\Network\FileSizeRolledBufferFiles.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\Private\Network\HttpLogShipper.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\Private\Network\IBufferFiles.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\Private\Network\PayloadReader.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\Private\Network\TimeRolledBufferFiles.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\Private\Sinks\ElasticEcsLogstashSink.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\Private\Sinks\FileSizeRolledDurableElasticEcsLogstashSink.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\Private\Sinks\TimeRolledDurableElasticEcsLogstashSink.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\Private\Time\ExponentialBackoffConnectionSchedule.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\Private\Time\PortableTimer.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\TextFormatters\CompactRenderedTextFormatter.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\TextFormatters\CompactTextFormatter.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\TextFormatters\KeyFormatter.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\TextFormatters\NamespacedTextFormatter.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\TextFormatters\NormalRenderedTextFormatter.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\TextFormatters\NormalTextFormatter.cs" />
+    <Compile Include="Sinks\ElasticEcsLogstash\TextFormatters\ValueFormatter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
+</Project>

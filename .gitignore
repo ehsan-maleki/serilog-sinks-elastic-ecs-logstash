@@ -1,0 +1,6 @@
+/.idea
+/[pP]ackages
+bin/
+obj/
+*.dll
+*.pdb

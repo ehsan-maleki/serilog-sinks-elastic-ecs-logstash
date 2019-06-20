@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AA0E50DF-CB5F-4182-B896-CD69B469D8C0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{AB8B9BE5-80FB-492A-BA28-66228EC84369}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.ElasticEcsLogstash", "src\Serilog.Sinks.ElasticEcsLogstash\Serilog.Sinks.ElasticEcsLogstash.csproj", "{8962BF5C-1BEE-4E71-B9B7-584180D74E3A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.ElasticEcsLogstashTest", "test\Serilog.Sinks.ElasticEcsLogstashTest\Serilog.Sinks.ElasticEcsLogstashTest.csproj", "{83B54EE0-6257-4743-90B8-A4C8FC8BD4CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emzam.Log.ElkLogProvider", "src\Emzam.Log.ElkLogProvider\Emzam.Log.ElkLogProvider.csproj", "{15C0C197-EF31-4D12-B465-3887B96D00C6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "resources", "resources", "{7F82EE08-DF4F-42B5-BFB0-13C07658A45A}"
+ProjectSection(SolutionItems) = preProject
+	resources\LICENSE = resources\LICENSE
+	.gitignore = .gitignore
+	README.md = README.md
+EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8962BF5C-1BEE-4E71-B9B7-584180D74E3A} = {AA0E50DF-CB5F-4182-B896-CD69B469D8C0}
+		{83B54EE0-6257-4743-90B8-A4C8FC8BD4CF} = {AB8B9BE5-80FB-492A-BA28-66228EC84369}
+		{15C0C197-EF31-4D12-B465-3887B96D00C6} = {AA0E50DF-CB5F-4182-B896-CD69B469D8C0}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8962BF5C-1BEE-4E71-B9B7-584180D74E3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8962BF5C-1BEE-4E71-B9B7-584180D74E3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8962BF5C-1BEE-4E71-B9B7-584180D74E3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8962BF5C-1BEE-4E71-B9B7-584180D74E3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83B54EE0-6257-4743-90B8-A4C8FC8BD4CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83B54EE0-6257-4743-90B8-A4C8FC8BD4CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83B54EE0-6257-4743-90B8-A4C8FC8BD4CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83B54EE0-6257-4743-90B8-A4C8FC8BD4CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15C0C197-EF31-4D12-B465-3887B96D00C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15C0C197-EF31-4D12-B465-3887B96D00C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15C0C197-EF31-4D12-B465-3887B96D00C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15C0C197-EF31-4D12-B465-3887B96D00C6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
