@@ -132,8 +132,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="package.png" />
-    <Content Include="Serilog.Sinks.ElasticEcsLogstash.1.0.0.nupkg" />
-    <Content Include="Serilog.Sinks.ElasticEcsLogstash.1.0.1.nupkg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

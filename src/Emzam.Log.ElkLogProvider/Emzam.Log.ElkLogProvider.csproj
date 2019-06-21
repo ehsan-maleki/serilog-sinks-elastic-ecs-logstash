@@ -67,8 +67,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Emzam.Log.ElkLogProvider.1.0.0.nupkg" />
-    <Content Include="Emzam.Log.ElkLogProvider.1.0.1.nupkg" />
     <Content Include="package.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
