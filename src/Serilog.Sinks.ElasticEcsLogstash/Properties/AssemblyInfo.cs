@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Serilog.Sinks.ElasticEcsLogstash")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Converts LogEvet to ECS standard schema and send to logstash.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Ehsan Maleki Zoerma <ehsan.maleki@gmail.com>")]
 [assembly: AssemblyProduct("Serilog.Sinks.ElasticEcsLogstash")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
+[assembly: AssemblyCopyright("Copyright ©EMZAM  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
