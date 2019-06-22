@@ -1,5 +1,7 @@
 using System;
+using System.ComponentModel.Design;
 using System.Configuration;
+using System.Data;
 using Emzam.Log.ElkLogProvider.Enum;
 
 namespace Serilog.Sinks.ElasticEcsLogstashTest.Core
@@ -8,18 +10,12 @@ namespace Serilog.Sinks.ElasticEcsLogstashTest.Core
     {
         private static readonly Random Randomizer = new Random();
 
-        public static void ChangeApplication()
-        {
-            var data = RandomApplication();
-            ConfigurationManager.AppSettings["ApplicationId"] = data[0];
-            ConfigurationManager.AppSettings["ApplicationName"] = data[1];
-            ConfigurationManager.AppSettings["ApplicationType"] = data[2];
-            ConfigurationManager.AppSettings["ApplicationVersion"] = data[3];
-        }
+        public static int RandomIndex(int max)
+            => Randomizer.Next(0, max);
 
         public static string[] RandomApplication()
         {
-            var index = Randomizer.Next(0, 6);
+            var index = RandomIndex(6);
             var ids = new[]
             {
                 "JOBSRV", "RABAGT",
@@ -44,12 +40,12 @@ namespace Serilog.Sinks.ElasticEcsLogstashTest.Core
         public static string RandomUsername()
         {
             var categories = new[] {"EhsanMaleki", "RezaAbbasi", "Soldier2019", "RedApple", "NewIceCream"};
-            return categories[Randomizer.Next(0, 4)];
+            return categories[RandomIndex(4)];
         }
 
         public static Severities RandomSeverity()
         {
-            var index = Randomizer.Next(0, 500);
+            var index = RandomIndex(500);
             if (index <= 100)
                 return Severities.Low;
 
@@ -72,7 +68,7 @@ namespace Serilog.Sinks.ElasticEcsLogstashTest.Core
 
         public static string RandomActionStatus()
         {
-            var index = Randomizer.Next(0, 100);
+            var index = RandomIndex(100);
             var categories = new[] {"Success", "Failed"};
             return categories[index < 50 ? 0 : 1];
         }
@@ -80,7 +76,7 @@ namespace Serilog.Sinks.ElasticEcsLogstashTest.Core
         public static string RandomAuditAction()
         {
             var categories = new[] {"User Signup", "User Login", "User Forget Password", "User Change Password", "User New Password", "User LogOut"};
-            return categories[Randomizer.Next(0, 5)];
+            return categories[RandomIndex(5)];
         }
 
         public static string RandomInfoAction()
@@ -90,12 +86,12 @@ namespace Serilog.Sinks.ElasticEcsLogstashTest.Core
                 "User payed order", "User got voucher", "User requested for cancellation", "User cancellation approved",
                 "User refused payment", "User checked in", "User checked out"
             };
-            return categories[Randomizer.Next(0, 5)];
+            return categories[RandomIndex(5)];
         }
-
+        
         public static string[] RandomDebugAction()
         {
-            var index = Randomizer.Next(0, 6);
+            var index = RandomIndex(6);
             var category = new[]
             {
                 "Coin Management", 
@@ -113,9 +109,26 @@ namespace Serilog.Sinks.ElasticEcsLogstashTest.Core
             };
         }
 
+        public static Exception RandomError()
+        {
+            var exceptions = new Exception[]
+            {
+                new ArgumentException("Invalid argument"), 
+                new CheckoutException("There is a config exception!!"), 
+                new ConstraintException("Invalid constraint!!"),  
+                new NullReferenceException("Object reference is null!!"), 
+                new AggregateException("Unable to aggregated!!"), 
+                new ArithmeticException("Wow, this is an arithmetic exception!!"), 
+                new FormatException("Invalid format!!"), 
+                new Exception("This is a general error!!"), 
+            };
+            
+            return exceptions[RandomIndex(exceptions.Length - 1)];
+        }
+
         public static string[] RandomErrorAction()
         {
-            var index = Randomizer.Next(0, 6);
+            var index = RandomIndex(6);
             var category = new[]
             {
                 "Place Details", 
@@ -139,7 +152,7 @@ namespace Serilog.Sinks.ElasticEcsLogstashTest.Core
 
         public static string[] RandomWarningAction()
         {
-            var index = Randomizer.Next(0, 5);
+            var index = RandomIndex(5);
             var category = new[]
             {
                 "Jabama Account Balance", 
@@ -159,7 +172,7 @@ namespace Serilog.Sinks.ElasticEcsLogstashTest.Core
 
         public static string[] RandomFetalAction()
         {
-            var index = Randomizer.Next(0, 5);
+            var index = RandomIndex(5);
             var category = new[]
             {
                 "Orders", 

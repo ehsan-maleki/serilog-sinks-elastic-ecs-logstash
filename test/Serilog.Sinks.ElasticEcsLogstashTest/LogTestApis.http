@@ -6,6 +6,20 @@ Accept: application/json
 
 ###
 # ~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~
+# Throughput Log Without Errors Test
+#
+GET http://localhost:2010/throughput-log/start
+Accept: application/json
+
+###
+# ~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~
+# Throughput Log Wit Errors Test
+#
+GET http://localhost:2010/throughput-log/start?re=yes
+Accept: application/json
+
+###
+# ~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~
 # Audit Log Test
 #
 GET http://localhost:2010/audit-log/fake-it

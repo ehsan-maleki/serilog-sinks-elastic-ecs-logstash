@@ -130,6 +130,7 @@
     <Compile Include="Controllers\FetalLogController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\InformationLogController.cs" />
+    <Compile Include="Controllers\ThrouputController.cs" />
     <Compile Include="Controllers\WarningLogController.cs" />
     <Compile Include="Core\RandomGenerator.cs" />
     <Compile Include="Global.asax.cs">

@@ -71,7 +71,8 @@ namespace Serilog.Sinks.ElasticEcsLogstash.TextFormatters
             if (logEvent.Properties.Count <= 0)
                 return;
 
-            WriteChildren("", "", logEvent.Properties.ToList(), output);
+            WriteProperties(logEvent.Properties, output);
+            //WriteChildren("", "", logEvent.Properties.ToList(), output);
         }
 
         #region Old Formatter

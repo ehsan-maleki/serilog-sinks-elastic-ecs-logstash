@@ -15,6 +15,8 @@ namespace Serilog.Sinks.ElasticEcsLogstashTest.Controllers
                 Message = "Welcom to elasticsearch ecs to logstash test api",
                 Urls = new
                 {
+                    TroughputWithoutErrorTest = Url.Action("Index", "Throughput"),
+                    TroughputWithErrorTest = Url.Action("Index", "Throughput", new { re = "yes"}),
                     AuditLogTest = Url.Action("Index", "AuditLog"),
                     InformationLogTest = Url.Action("Index", "InformationLog"),
                     DebugLogTest = Url.Action("Index", "DebugLog"),

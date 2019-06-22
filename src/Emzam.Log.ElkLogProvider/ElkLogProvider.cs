@@ -23,7 +23,6 @@ namespace Emzam.Log.ElkLogProvider
                 .MinimumLevel.Verbose()
                 .Enrich.FromLogContext()
                 .Enrich.WithEcs()
-                .WriteTo.Console()
                 .WriteTo.ElasticEcsLogstash(ConfigurationManager.AppSettings["LoggerLogstashUrl"] ?? "http://localhost:8080")
                 .CreateLogger();
         }
