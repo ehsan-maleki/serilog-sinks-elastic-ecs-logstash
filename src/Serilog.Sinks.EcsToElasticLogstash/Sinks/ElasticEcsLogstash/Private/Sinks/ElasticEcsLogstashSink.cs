@@ -1,0 +1,141 @@
+﻿// Copyright 2015-2019 Serilog Contributors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using Serilog.Debugging;
+using Serilog.Events;
+using Serilog.Formatting;
+using Serilog.Sinks.PeriodicBatching;
+
+namespace Serilog.Sinks.ElasticEcsLogstash.Private.Sinks
+{
+    /// <summary>
+    /// A non-durable sink that sends log events using HTTP POST over the network. A non-durable
+    /// sink will lose data after a system or process restart.
+    /// </summary>
+    /// <seealso cref="PeriodicBatchingSink" />
+    public class ElasticEcsLogstashSink : PeriodicBatchingSink
+    {
+        private const string ContentType = "application/json";
+
+        private readonly string requestUri;
+        private readonly ITextFormatter textFormatter;
+        private readonly IBatchFormatter batchFormatter;
+
+        private IHttpClient client;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ElasticEcsLogstashSink"/> class.
+        /// </summary>
+        /// <remarks>
+        /// We need two constructors since <see cref="PeriodicBatchingSink"/> is behaving
+        /// differently depending on whether we specify a queue limit or not.
+        /// </remarks>
+        public ElasticEcsLogstashSink(
+            string requestUri,
+            int batchPostingLimit,
+            int queueLimit,
+            TimeSpan period,
+            ITextFormatter textFormatter,
+            IBatchFormatter batchFormatter,
+            IHttpClient client)
+            : base(batchPostingLimit, period, queueLimit)
+        {
+            this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
+            this.textFormatter = textFormatter ?? throw new ArgumentNullException(nameof(textFormatter));
+            this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
+            this.client = client ?? throw new ArgumentNullException(nameof(client));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ElasticEcsLogstashSink"/> class.
+        /// </summary>
+        /// <remarks>
+        /// We need two constructors since <see cref="PeriodicBatchingSink"/> is behaving
+        /// differently depending on whether we specify a queue limit or not.
+        /// </remarks>
+        public ElasticEcsLogstashSink(
+            string requestUri,
+            int batchPostingLimit,
+            TimeSpan period,
+            ITextFormatter textFormatter,
+            IBatchFormatter batchFormatter,
+            IHttpClient client)
+            : base(batchPostingLimit, period)
+        {
+            this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
+            this.textFormatter = textFormatter ?? throw new ArgumentNullException(nameof(textFormatter));
+            this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
+            this.client = client ?? throw new ArgumentNullException(nameof(client));
+        }
+
+        /// <inheritdoc />
+        protected override async Task EmitBatchAsync(IEnumerable<LogEvent> logEvents)
+        {
+            var events = logEvents.ToList();
+            if(!events.Any())
+                return;
+
+            foreach (var @event in events)
+            {
+                var payload = FormatPayload(@event);
+                var content = new StringContent(payload, Encoding.UTF8, ContentType);
+                var result = await client
+                    .PostAsync(requestUri, content)
+                    .ConfigureAwait(false);
+
+                if (!result.IsSuccessStatusCode)
+                {
+                    throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to {requestUri}");
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if (disposing)
+            {
+                client?.Dispose();
+                client = null;
+            }
+        }
+
+        private string FormatPayload(LogEvent logEvent)
+        {
+            var payload = new StringWriter();
+
+            textFormatter.Format(logEvent, payload);
+
+            return payload.ToString();
+        }
+
+        private string FormatPayload(IEnumerable<LogEvent> logEvents)
+        {
+            var payload = new StringWriter();
+
+            batchFormatter.Format(logEvents, textFormatter, payload);
+
+            return payload.ToString();
+        }
+    }
+}
