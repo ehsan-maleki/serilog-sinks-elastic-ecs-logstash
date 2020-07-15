@@ -17,7 +17,7 @@ namespace Serilog.Sinks.EcsToElasticLogstashCoreTest.Controllers
 
         public AuditLogController(IHttpContextAccessor httpContextAccessor)
         {
-            logProvider = new ElkLogProvider(httpContextAccessor, "http://localhost:1010");
+                logProvider = new ElkLogProvider(httpContextAccessor, "https://queue.netbar.org");
         }
 
         [HttpGet, Route("fake-it")]

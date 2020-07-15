@@ -112,13 +112,15 @@ namespace Serilog.Enrichers.Private.Ecs
                             // ServerVariables = request?.ServerVariables.AllKeys.Select(key => $"{key}={request?.ServerVariables[key]}").ToList(),
                             Cookies = request?.Cookies.Keys.Select(key => $"{key}={request?.Cookies[key]}").ToList(),
                             // Files = request?.Files?.AllKeys.ToList(),
-                            Form = request?.Form?.Keys.Select(key => $"{key}={request?.Form[key]}").ToList(),
                             ContentLength = request?.ContentLength,
+                            Form = string.IsNullOrEmpty(request?.ContentType) || (request?.ContentLength ?? 0) == 0 
+                                ? null 
+                                : request?.Form?.Keys.Select(key => $"{key}={request?.Form[key]}").ToList(),
                             Bytes = request?.ContentLength ?? 0,
                             Body = new HttpBodyModel
                             {
                                 Bytes = request?.ContentLength ?? 0,
-                                Content = request?.Body.ToString()
+                                Content = (request?.ContentLength ?? 0) > 0 && (request?.Body.CanRead ?? false) ? request?.Body.ToString() : null
                             },
                             Referrer = request?.Headers["Referer"].ToString()
                         },
@@ -152,9 +154,7 @@ namespace Serilog.Enrichers.Private.Ecs
                         Address = e.Properties.ContainsKey("Host")
                             ? e.Properties["Host"].ToString()
                             : null,
-                        Ip = e.Properties.ContainsKey("Host")
-                            ? e.Properties["Host"].ToString()
-                            : null,
+                        Ip = request.Host.Host
                     },
                     Log = new LogModel
                     {

@@ -154,8 +154,8 @@ namespace Serilog.Sinks.EcsToElasticLogstashCoreTest.Core
             var index = RandomIndex(5);
             var category = new[]
             {
-                "Jabama Account Balance", 
-                "Jabama Transfer"
+                "iCompany Account Balance", 
+                "iCompany Transfer"
             };
             var action = new[]
             {

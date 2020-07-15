@@ -13,7 +13,7 @@ namespace Emzam.Log.ElkEcsLogBySerilogProvider.Models
         public string Id { get; set; }
         /// <summary>
         /// Name of current applications.
-        /// Such as: Jabama Api v1, Jabama Api v1.0.0 and etc.
+        /// Such as: iCompany Api v1, iCompany Api v1.0.0 and etc.
         /// </summary>
         public string Name { get; set; }
         /// <summary>
