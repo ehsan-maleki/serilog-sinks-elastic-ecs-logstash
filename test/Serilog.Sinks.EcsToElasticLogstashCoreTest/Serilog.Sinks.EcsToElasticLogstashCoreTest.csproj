@@ -5,7 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Emzam.Log.ElkEcsLogBySerilogProvider\Emzam.Log.ElkEcsLogBySerilogProvider.csproj" />
+      <ProjectReference Include="..\..\src\Emzam.Log.ElkLogProvider\Emzam.Log.ElkLogProvider.csproj" />
     </ItemGroup>
 
 

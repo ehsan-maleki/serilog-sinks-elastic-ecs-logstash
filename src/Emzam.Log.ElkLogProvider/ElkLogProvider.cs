@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using Emzam.Log.ElkLogProvider.Enum;
 using Emzam.Log.ElkLogProvider.Models;
+using Microsoft.AspNetCore.Http;
 using Serilog;
 using Serilog.Context;
 using Serilog.Core;
@@ -15,19 +16,20 @@ namespace Emzam.Log.ElkLogProvider
 
         public Logger _logger { get; }
 
-        public ElkLogProvider()
+        public ElkLogProvider(IHttpContextAccessor context, string logstashUrl = null, 
+            LogApplicationModel application = null)
         {
-            _application = new LogApplicationModel();
+            _application = application ?? new LogApplicationModel();
             
             _logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .Enrich.FromLogContext()
-                .Enrich.WithEcs()
-                .WriteTo.ElasticEcsLogstash(ConfigurationManager.AppSettings["LoggerLogstashUrl"] ?? "http://localhost:8080")
+                .Enrich.WithEcs(context)
+                .WriteTo.ElasticEcsLogstash(logstashUrl ?? "http://localhost:8080")
                 .CreateLogger();
         }
 
-        public void ChangeApplication(LogApplicationModel application)
+        public void SetApplication(LogApplicationModel application)
             => _application = new LogApplicationModel(application);
                 
         public void LogInformation(string category, string name, List<KeyValuePair<string, string>> payload)

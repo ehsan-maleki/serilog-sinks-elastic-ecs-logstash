@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 using Serilog.Core;
 using Serilog.Enrichers.Private.Ecs;
 using Serilog.Events;
@@ -10,11 +11,23 @@ namespace Serilog.Enrichers
 {
     public class WithEcsEnricher : ILogEventEnricher
     {
+        private readonly HttpContext _context;
+
+        public WithEcsEnricher()
+            : this(null)
+        {
+        }
+
+        public WithEcsEnricher(HttpContext context)
+        {
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+        }
+
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
             if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
 
-            var ecsProperties = ConvertToEcs(logEvent, propertyFactory);
+            var ecsProperties = ConvertToEcs(_context, logEvent, propertyFactory);
 
             var properties = logEvent.Properties.Select(x => x.Key).ToList();
             foreach (var property in properties)
@@ -24,11 +37,11 @@ namespace Serilog.Enrichers
                 logEvent.AddPropertyIfAbsent(property.Value);
         }
 
-        private static Dictionary<string, LogEventProperty> ConvertToEcs(LogEvent e, ILogEventPropertyFactory propertyFactory)
+        private static Dictionary<string, LogEventProperty> ConvertToEcs(HttpContext context, LogEvent e, ILogEventPropertyFactory propertyFactory)
         {
             try
             {
-                var ecsModel = LogEventToEcsConverter.ConvertToEcs(e);
+                var ecsModel = LogEventToEcsConverter.ConvertToEcs(context, e);
                 var properties = MapToDictionary(ecsModel, null, propertyFactory);
                 return properties;
             }

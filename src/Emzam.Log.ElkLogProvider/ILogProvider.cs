@@ -11,7 +11,7 @@ namespace Emzam.Log.ElkLogProvider
         LogApplicationModel _application { get; }
         Logger _logger { get; }
 
-        void ChangeApplication(LogApplicationModel application);
+        void SetApplication(LogApplicationModel application);
 
         void LogInformation(string category, string name, List<KeyValuePair<string, string>> payload);
         void LogDebug(string name, List<KeyValuePair<string, string>> payload, string category = "Default Logs");

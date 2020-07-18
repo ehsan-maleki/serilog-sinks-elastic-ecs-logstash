@@ -13,7 +13,7 @@ namespace Emzam.Log.ElkLogProvider.Models
         public string Id { get; set; }
         /// <summary>
         /// Name of current applications.
-        /// Such as: Jabama Api v1, Jabama Api v1.0.0 and etc.
+        /// Such as: iCompany Api v1, iCompany Api v1.0.0 and etc.
         /// </summary>
         public string Name { get; set; }
         /// <summary>
@@ -29,13 +29,10 @@ namespace Emzam.Log.ElkLogProvider.Models
 
         public LogApplicationModel()
         {
-            Id = ConfigurationManager.AppSettings["ApplicationId"] ?? "Unknown";
-            Name = ConfigurationManager.AppSettings["ApplicationName"] ?? "Unknown";
-
-            var type = ConfigurationManager.AppSettings["ApplicationType"];
-            Type = (ApplicationTypes) System.Enum.Parse(typeof(ApplicationTypes), type ?? "Unknown",true);
-            
-            Version = ConfigurationManager.AppSettings["ApplicationVersion"] ?? "1.0.0";
+            Id = "Unknown";
+            Name = "Unknown";
+            Type = ApplicationTypes.Unknown;
+            Version = "0.0.0";
         }
 
         public LogApplicationModel(LogApplicationModel data)
