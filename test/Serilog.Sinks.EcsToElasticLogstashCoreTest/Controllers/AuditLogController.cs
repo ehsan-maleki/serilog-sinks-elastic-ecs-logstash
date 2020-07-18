@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Emzam.Log.ElkEcsLogBySerilogProvider;
-using Emzam.Log.ElkEcsLogBySerilogProvider.Enum;
-using Emzam.Log.ElkEcsLogBySerilogProvider.Models;
+using Emzam.Log.ElkLogProvider;
+using Emzam.Log.ElkLogProvider.Enum;
+using Emzam.Log.ElkLogProvider.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Serilog.Sinks.EcsToElasticLogstashCoreTest.Core;

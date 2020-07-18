@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.Design;
 using System.Data;
-using Emzam.Log.ElkEcsLogBySerilogProvider.Enum;
+using Emzam.Log.ElkLogProvider.Enum;
 
 namespace Serilog.Sinks.EcsToElasticLogstashCoreTest.Core
 {
