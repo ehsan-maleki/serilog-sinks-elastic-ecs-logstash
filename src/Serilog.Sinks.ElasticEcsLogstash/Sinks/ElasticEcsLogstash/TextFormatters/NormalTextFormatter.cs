@@ -87,12 +87,12 @@ namespace Serilog.Sinks.ElasticEcsLogstash.TextFormatters
 
             foreach (var property in properties.Where(x => x.Key.IndexOf('[') == -1))
             {
+                output.Write(precedingDelimiter);
+                precedingDelimiter = ",";
+
                 var key = property.Key.ToUnderscoreCase();
                 if (property.Key.ToLower() == "timestamp")
                     key = "@timestamp";
-
-                output.Write(precedingDelimiter);
-                precedingDelimiter = ",";
 
                 JsonValueFormatter.WriteQuotedJsonString(key, output);
                 output.Write(':');

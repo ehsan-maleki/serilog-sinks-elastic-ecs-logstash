@@ -12,8 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Disable ReSharper Warnings 
+// ReSharper disable UnusedType.Global
+// ReSharper disable UnusedMember.Global
+// ReSharper disable MemberCanBePrivate.Global
+
 using System;
 using System.ComponentModel;
+using System.Net.Http;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Formatting;
@@ -77,11 +83,13 @@ namespace Serilog
         {
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
-            // Default values
-            period =  period ?? TimeSpan.FromSeconds(2);
-            textFormatter = textFormatter ?? new NormalRenderedTextFormatter();
-            batchFormatter = batchFormatter ?? new DefaultBatchFormatter();
-            httpClient = httpClient ?? new DefaultHttpClient();
+            // Default values 
+            // Emzam.Log.ElkLogProvider
+            // Serilog.Sinks.ElasticEcsLogstash
+            period ??= TimeSpan.FromSeconds(2);
+            textFormatter ??= new NormalRenderedTextFormatter();
+            batchFormatter ??= new DefaultBatchFormatter();
+            httpClient ??= new DefaultHttpClient();
 
             var sink = queueLimit != null
                 ? new ElasticEcsLogstashSink(requestUri, batchPostingLimit, queueLimit.Value, period.Value, textFormatter, batchFormatter, httpClient)
@@ -186,10 +194,10 @@ namespace Serilog
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
             // Default values
-            period = period ?? TimeSpan.FromSeconds(2);
-            textFormatter = textFormatter ?? new NormalRenderedTextFormatter();
-            batchFormatter = batchFormatter ?? new DefaultBatchFormatter();
-            httpClient = httpClient ?? new DefaultHttpClient();
+            period ??= TimeSpan.FromSeconds(2);
+            textFormatter ??= new NormalRenderedTextFormatter();
+            batchFormatter ??= new DefaultBatchFormatter();
+            httpClient ??= new DefaultHttpClient();
 
             var sink = new TimeRolledDurableElasticEcsLogstashSink(
                 requestUri,
@@ -274,10 +282,10 @@ namespace Serilog
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
             // Default values
-            period = period ?? TimeSpan.FromSeconds(2);
-            textFormatter = textFormatter ?? new NormalRenderedTextFormatter();
-            batchFormatter = batchFormatter ?? new DefaultBatchFormatter();
-            httpClient = httpClient ?? new DefaultHttpClient();
+            period ??= TimeSpan.FromSeconds(2);
+            textFormatter ??= new NormalRenderedTextFormatter();
+            batchFormatter ??= new DefaultBatchFormatter();
+            httpClient ??= new DefaultHttpClient();
 
             var sink = new FileSizeRolledDurableElasticEcsLogstashSink(
                 requestUri,

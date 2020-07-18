@@ -4,5 +4,7 @@ bin/
 obj/
 *.dll
 *.pdb
+*.blob
+/*.blob
 .vs/
 *.user

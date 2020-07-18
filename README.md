@@ -161,11 +161,11 @@ Such as `Too many invalid login`, `Too many search by one user` and ...
 ### Fetal Log
 In some situations you decide to not to continue application run and raise events.
 Fetal logs designed for  such situations. 
- Example of fetal are `Jabama bank account balance is low`, `SMS serivce provider went down` and ...
+ Example of fetal are `Bank account balance is low`, `SMS serivce provider went down` and ...
   * Severity level: _High_.
 ```
     _logProvider.LogFetal(
-        "Name: Jabama bank account balance is low!", 
+        "Name: Bank account balance is low!", 
         /* Payload Data */ 
         new List<KeyValuePair<string, string>>
         {

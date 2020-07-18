@@ -1,80 +1,33 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{15C0C197-EF31-4D12-B465-3887B96D00C6}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Emzam.Log.ElkLogProvider</RootNamespace>
-    <AssemblyName>Emzam.Log.ElkLogProvider</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
-      <HintPath>..\..\packages\Serilog.2.8.0\lib\net46\Serilog.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Serilog.Sinks.Console, Version=3.1.1.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
-      <HintPath>..\..\packages\Serilog.Sinks.Console.3.1.1\lib\net45\Serilog.Sinks.Console.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="ElkLogProvider.cs" />
-    <Compile Include="Enum\ApplicationTypes.cs" />
-    <Compile Include="Enum\LogCategories.cs" />
-    <Compile Include="Enum\Severities.cs" />
-    <Compile Include="ILogProvider.cs" />
-    <Compile Include="Models\JabamaActionModel.cs" />
-    <Compile Include="Models\LogApplicationModel.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Serilog.Sinks.ElasticEcsLogstash\Serilog.Sinks.ElasticEcsLogstash.csproj">
-      <Project>{8962bf5c-1bee-4e71-b9b7-584180d74e3a}</Project>
-      <Name>Serilog.Sinks.ElasticEcsLogstash</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="package.png" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-         Other similar extension points exist, see Microsoft.Common.targets.
-    <Target Name="BeforeBuild">
-    </Target>
-    <Target Name="AfterBuild">
-    </Target>
-    -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageId>Emzam.Log.ElkLogProvider</PackageId>
+        <PackageVersion>1.5.0</PackageVersion>
+        <Title>ELK Professional Logging Tools</Title>
+        <Authors>Ehsan Maleki Zoeram</Authors>
+        <Description>You can log everything to ElasticSearch using ECS schema and logstash.</Description>
+        <Copyright>MIT</Copyright>
+        <PackageProjectUrl>https://github.com/ehsan-maleki/serilog-sinks-elastic-ecs-logstash</PackageProjectUrl>
+        <PackageLicenseUrl>https://licenses.nuget.org/MIT</PackageLicenseUrl>
+        <PackageIconUrl>https://github.com/ehsan-maleki/serilog-sinks-elastic-ecs-logstash/blob/master/src/Emzam.Log.ElkLogProvider/package.png?raw=true</PackageIconUrl>
+        <RepositoryUrl>https://github.com/ehsan-maleki/serilog-sinks-elastic-ecs-logstash.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>Serilog Logstash Sink Elasticsearch ECS Enricher Http</PackageTags>
+        <PackageReleaseNotes>For release notes, please see the changes log on GitHub.</PackageReleaseNotes>
+        <AssemblyVersion>1.5.0</AssemblyVersion>
+        <FileVersion>1.5.0</FileVersion>
+        <LangVersion>latestmajor</LangVersion>
+        <RootNamespace>Emzam.Log.ElkLogProvider</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Content Include="package.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Serilog.Sinks.ElasticEcsLogstash\Serilog.Sinks.ElasticEcsLogstash.csproj" />
+    </ItemGroup>
+
 </Project>
