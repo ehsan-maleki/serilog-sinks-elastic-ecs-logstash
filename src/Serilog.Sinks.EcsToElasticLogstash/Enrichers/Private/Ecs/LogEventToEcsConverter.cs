@@ -19,7 +19,9 @@ namespace Serilog.Enrichers.Private.Ecs
             try
             {
                 var request = context.Request;
+                var headers = context.Request.Headers;
                 var response = context.Response;
+                var connection = context.Connection;
                 var error = e.Exception;
                 var user = context.User;
                 var thread = System.Threading.Thread.CurrentThread;
@@ -28,6 +30,9 @@ namespace Serilog.Enrichers.Private.Ecs
                 {
                     Timestamp = e.Timestamp,
                     Ecs = new EcsModel(),
+
+                    #region -- PAYLOAD --
+
                     Payload = e.Properties.ContainsKey("ActionPayload")
                         // ReSharper disable once SuspiciousTypeConversion.Global
                         ? (e.Properties["ActionPayload"] as SequenceValue)?.Elements
@@ -40,6 +45,11 @@ namespace Serilog.Enrichers.Private.Ecs
                         .Select(value => $"{value[0].Trim()}={value[1].Trim()}")
                         .ToList()
                         : null,
+
+                    #endregion
+
+                    #region -- AGENT --
+
                     Agent = new AgentModel
                     {
                         Id = e.Properties.ContainsKey("ApplicationId")
@@ -55,11 +65,18 @@ namespace Serilog.Enrichers.Private.Ecs
                             ? e.Properties["ApplicationVersion"].ToString()
                             : null
                     },
+
+                    #endregion
+
+                    #region -- CLIENT --
+
                     Client = new ClientModel
                     {
-                        Address = context.Connection?.RemoteIpAddress + ":"+
-                        context.Connection?.RemotePort,
-                        Ip = context.Connection?.RemoteIpAddress.ToString(),
+                        Address = connection?.RemoteIpAddress + ":" +
+                                  connection?.RemotePort,
+                        Ip = headers.Keys.Contains("X_REAL_IP")
+                        ? headers["X_REAL_IP"].FirstOrDefault()
+                        : connection?.RemoteIpAddress.ToString(),
                         Bytes = request?.ContentLength ?? 0,
                         User = string.IsNullOrEmpty(user?.Identity?.Name)
                             ? null
@@ -70,6 +87,11 @@ namespace Serilog.Enrichers.Private.Ecs
                                 Email = user.Identity?.Name
                             }
                     },
+
+                    #endregion
+
+                    #region -- EVENT --
+
                     Event = new EventModel
                     {
                         Created = DateTime.UtcNow,
@@ -90,6 +112,11 @@ namespace Serilog.Enrichers.Private.Ecs
                             : 0,
                         Timezone = TimeZoneInfo.Local.DisplayName
                     },
+
+                    #endregion
+
+                    #region -- ERROR --
+
                     Error = error != null
                         ? new ErrorModel
                         {
@@ -98,8 +125,13 @@ namespace Serilog.Enrichers.Private.Ecs
                             Code = error.GetType().ToString()
                         }
                         : null,
+
+                    #endregion
+
                     Http = new HttpModel
                     {
+                        #region -- REQUEST --
+
                         Request = new HttpRequestModel
                         {
                             Method = request?.Method,
@@ -113,8 +145,8 @@ namespace Serilog.Enrichers.Private.Ecs
                             Cookies = request?.Cookies.Keys.Select(key => $"{key}={request?.Cookies[key]}").ToList(),
                             // Files = request?.Files?.AllKeys.ToList(),
                             ContentLength = request?.ContentLength,
-                            Form = string.IsNullOrEmpty(request?.ContentType) || (request?.ContentLength ?? 0) == 0 
-                                ? null 
+                            Form = string.IsNullOrEmpty(request?.ContentType) || (request?.ContentLength ?? 0) == 0
+                                ? null
                                 : request?.Form?.Keys.Select(key => $"{key}={request?.Form[key]}").ToList(),
                             Bytes = request?.ContentLength ?? 0,
                             Body = new HttpBodyModel
@@ -124,17 +156,27 @@ namespace Serilog.Enrichers.Private.Ecs
                             },
                             Referrer = request?.Headers["Referer"].ToString()
                         },
+
+                        #endregion
+
+                        #region -- RESPONSE --
+
                         Response = new HttpResponseModel
                         {
                             // Bytes = 0, // response?.OutputStream.Length ?? 0,
-                            StatusCode = response?.StatusCode ?? 0/*,
+                            StatusCode = response?.StatusCode ?? 0 /*,
                             Body = new HttpBodyModel
                             {
                                 Bytes = 0, //response?.OutputStream.Length ?? 0,
                                 Content = response?.Body.ToString()
                             }*/
                         }
+
+                        #endregion
                     },
+
+                    #region -- PROCESS --
+
                     Process = new ProcessModel
                     {
                         Title = thread.Name,
@@ -145,6 +187,11 @@ namespace Serilog.Enrichers.Private.Ecs
                             Id = thread.ManagedThreadId,
                         }
                     },
+
+                    #endregion
+
+                    #region -- SERVER --
+
                     Server = new ServerModel
                     {
                         Domain = request.Host.Host,
@@ -156,10 +203,16 @@ namespace Serilog.Enrichers.Private.Ecs
                             : null,
                         Ip = request.Host.Host
                     },
+
+                    #endregion
+
                     Log = new LogModel
                     {
                         Level = $"{e.Level}"
                     },
+
+                    #region -- URL --
+
                     Url = new UrlModel
                     {
                         Original = $"{request?.Host}{request?.QueryString}",
@@ -171,6 +224,11 @@ namespace Serilog.Enrichers.Private.Ecs
                         Username = user?.Identity?.Name,
                         Port = request?.Host.Port ?? 0
                     },
+
+                    #endregion
+
+                    #region -- USER --
+
                     User = string.IsNullOrEmpty(user?.Identity?.Name)
                         ? null
                         : new UserModel
@@ -178,7 +236,12 @@ namespace Serilog.Enrichers.Private.Ecs
                             Id = user?.Identity?.Name,
                             Name = user?.Identity?.Name,
                             Email = user?.Identity?.Name
-                        }//,
+                        } //,
+
+                    #endregion
+
+                    #region -- USER AGENT --
+
                     /*UserAgent = new UserAgentModel
                     {
                         IsMobileDevice = request?.?.IsMobileDevice,
@@ -196,6 +259,8 @@ namespace Serilog.Enrichers.Private.Ecs
                         Type = request?.Browser?.Type,
                         Version = request?.Browser?.Version,
                     }*/
+
+                    #endregion
                 };
 
                 return ecsModel;
