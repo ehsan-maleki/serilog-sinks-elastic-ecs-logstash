@@ -13,6 +13,12 @@ ProjectSection(SolutionItems) = preProject
 	resources\Emzam.Log.ElkLogProvider.1.0.1.nupkg = resources\Emzam.Log.ElkLogProvider.1.0.1.nupkg
 	resources\Serilog.Sinks.ElasticEcsLogstash.1.0.0.nupkg = resources\Serilog.Sinks.ElasticEcsLogstash.1.0.0.nupkg
 	resources\Serilog.Sinks.ElasticEcsLogstash.1.0.1.nupkg = resources\Serilog.Sinks.ElasticEcsLogstash.1.0.1.nupkg
+	resources\Emzam.Log.ElkLogProvider.1.5.0.nupkg = resources\Emzam.Log.ElkLogProvider.1.5.0.nupkg
+	resources\Emzam.Log.ElkLogProvider.1.5.1.nupkg = resources\Emzam.Log.ElkLogProvider.1.5.1.nupkg
+	resources\Emzam.Log.ElkLogProvider.1.5.2.nupkg = resources\Emzam.Log.ElkLogProvider.1.5.2.nupkg
+	resources\Serilog.Sinks.ElasticEcsLogstash.1.5.0.nupkg = resources\Serilog.Sinks.ElasticEcsLogstash.1.5.0.nupkg
+	resources\Serilog.Sinks.ElasticEcsLogstash.1.5.1.nupkg = resources\Serilog.Sinks.ElasticEcsLogstash.1.5.1.nupkg
+	resources\Serilog.Sinks.ElasticEcsLogstash.1.5.2.nupkg = resources\Serilog.Sinks.ElasticEcsLogstash.1.5.2.nupkg
 EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.ElasticEcsLogstash", "src\Serilog.Sinks.ElasticEcsLogstash\Serilog.Sinks.ElasticEcsLogstash.csproj", "{2ED2FFD9-F950-4E1E-BC28-56CBCD6ADAD5}"
