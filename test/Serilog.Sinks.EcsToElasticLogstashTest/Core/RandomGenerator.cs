@@ -1,10 +1,9 @@
 using System;
 using System.ComponentModel.Design;
-using System.Configuration;
 using System.Data;
 using Emzam.Log.ElkLogProvider.Enum;
 
-namespace Serilog.Sinks.EcsToElasticLogstashClassicTest.Core
+namespace Serilog.Sinks.EcsToElasticLogstashCoreTest.Core
 {
     public static class RandomGenerator
     {
@@ -155,8 +154,8 @@ namespace Serilog.Sinks.EcsToElasticLogstashClassicTest.Core
             var index = RandomIndex(5);
             var category = new[]
             {
-                "Jabama Account Balance", 
-                "Jabama Transfer"
+                "iCompany Account Balance", 
+                "iCompany Transfer"
             };
             var action = new[]
             {

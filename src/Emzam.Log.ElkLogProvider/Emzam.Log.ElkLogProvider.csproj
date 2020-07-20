@@ -4,30 +4,35 @@
         <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageId>Emzam.Log.ElkLogProvider</PackageId>
-        <PackageVersion>1.5.0</PackageVersion>
+        <PackageVersion>1.5.2</PackageVersion>
         <Title>ELK Professional Logging Tools</Title>
         <Authors>Ehsan Maleki Zoeram</Authors>
         <Description>You can log everything to ElasticSearch using ECS schema and logstash.</Description>
-        <Copyright>MIT</Copyright>
+        <Copyright>Coyright 2020 Ehsan Maleki Zoeram</Copyright>
         <PackageProjectUrl>https://github.com/ehsan-maleki/serilog-sinks-elastic-ecs-logstash</PackageProjectUrl>
+        <PackageLicense>MIT</PackageLicense>
         <PackageLicenseUrl>https://licenses.nuget.org/MIT</PackageLicenseUrl>
-        <PackageIconUrl>https://github.com/ehsan-maleki/serilog-sinks-elastic-ecs-logstash/blob/master/src/Emzam.Log.ElkLogProvider/package.png?raw=true</PackageIconUrl>
+        <PackageIcon>Emzam.Log.ElkLogProvider.png</PackageIcon>
         <RepositoryUrl>https://github.com/ehsan-maleki/serilog-sinks-elastic-ecs-logstash.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>Serilog Logstash Sink Elasticsearch ECS Enricher Http</PackageTags>
         <PackageReleaseNotes>For release notes, please see the changes log on GitHub.</PackageReleaseNotes>
-        <AssemblyVersion>1.5.0</AssemblyVersion>
-        <FileVersion>1.5.0</FileVersion>
-        <LangVersion>latestmajor</LangVersion>
+        <AssemblyVersion>1.5.2</AssemblyVersion>
+        <FileVersion>1.5.2</FileVersion>
         <RootNamespace>Emzam.Log.ElkLogProvider</RootNamespace>
+        <LangVersion>latestmajor</LangVersion>
+        <NeutralLanguage>en-US</NeutralLanguage>
     </PropertyGroup>
 
     <ItemGroup>
-      <Content Include="package.png" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\Serilog.Sinks.ElasticEcsLogstash\Serilog.Sinks.ElasticEcsLogstash.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <None Include="Emzam.Log.ElkLogProvider.png">
+          <Pack>true</Pack>
+          <PackagePath>/</PackagePath>
+        </None>
     </ItemGroup>
 
 </Project>

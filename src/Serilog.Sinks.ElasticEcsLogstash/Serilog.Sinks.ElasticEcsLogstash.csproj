@@ -4,22 +4,24 @@
         <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageId>Serilog.Sinks.ElasticEcsLogstash</PackageId>
-        <PackageVersion>1.5.0</PackageVersion>
+        <PackageVersion>1.5.2</PackageVersion>
         <Title>Serilog Http Sink for logstash based on elasricsearch ECS schema</Title>
         <Authors>Ehsan Maleki Zoeram</Authors>
         <Description>Serilog http sink for logstash. Also there is a ECS enricher that converts all properties of LogEvent to elasticseach ecs schema before send to logstash. For more information please reffer to GitHub Repository.</Description>
-        <Copyright>MIT</Copyright>
+        <Copyright>Coyright 2020 Ehsan Maleki Zoeram</Copyright>
         <PackageProjectUrl>https://github.com/ehsan-maleki/serilog-sinks-elastic-ecs-logstash</PackageProjectUrl>
+        <PackageLicense>MIT</PackageLicense>
         <PackageLicenseUrl>https://licenses.nuget.org/MIT</PackageLicenseUrl>
-        <PackageIconUrl>https://raw.githubusercontent.com/ehsan-maleki/serilog-sinks-elastic-ecs-logstash/master/src/Serilog.Sinks.ElasticEcsLogstash/package.png</PackageIconUrl>
+        <PackageIcon>Serilog.Sinks.ElasticEcsLogstash.png</PackageIcon>
         <RepositoryUrl>https://github.com/ehsan-maleki/serilog-sinks-elastic-ecs-logstash.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>Serilog Logstash Sink Elasticsearch ECS Enricher Http</PackageTags>
         <PackageReleaseNotes>For release notes, please see the changes log on GitHub.</PackageReleaseNotes>
-        <AssemblyVersion>1.5.0</AssemblyVersion>
-        <FileVersion>1.5.0</FileVersion>
+        <AssemblyVersion>1.5.2</AssemblyVersion>
+        <FileVersion>1.5.2</FileVersion>
         <RootNamespace>Serilog</RootNamespace>
         <LangVersion>latestmajor</LangVersion>
+        <NeutralLanguage>en-US</NeutralLanguage>
     </PropertyGroup>
 
     <ItemGroup>
@@ -29,9 +31,11 @@
       <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.2.0" />
       <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
     </ItemGroup>
-
     <ItemGroup>
-      <Content Include="package.png" />
+        <None Include="Serilog.Sinks.ElasticEcsLogstash.png">
+          <Pack>true</Pack>
+          <PackagePath>/</PackagePath>
+        </None>
     </ItemGroup>
 
 </Project>
