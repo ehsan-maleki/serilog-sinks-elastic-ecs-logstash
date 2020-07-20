@@ -19,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.ElasticEcsLog
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emzam.Log.ElkLogProvider", "src\Emzam.Log.ElkLogProvider\Emzam.Log.ElkLogProvider.csproj", "{3D60ECF6-074E-4562-9E52-EB8099A65B33}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.EcsToElasticLogstashCoreTest", "test\Serilog.Sinks.EcsToElasticLogstashCoreTest\Serilog.Sinks.EcsToElasticLogstashCoreTest.csproj", "{BD33223E-4D51-4D00-9A19-932E46783C27}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.EcsToElasticLogstashTest", "test\Serilog.Sinks.EcsToElasticLogstashTest\Serilog.Sinks.EcsToElasticLogstashTest.csproj", "{BD33223E-4D51-4D00-9A19-932E46783C27}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

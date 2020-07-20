@@ -141,9 +141,9 @@ namespace Serilog.Enrichers.Private.Ecs
                             Cookies = request?.Cookies.Keys.Select(key => $"{key}={request?.Cookies[key]}").ToList(),
                             // Files = request?.Files?.AllKeys.ToList(),
                             ContentLength = request?.ContentLength,
-                            Form = string.IsNullOrEmpty(request?.ContentType) || (request?.ContentLength ?? 0) == 0
+                            /*Form = string.IsNullOrEmpty(request?.ContentType) || (request?.ContentLength ?? 0) == 0
                                 ? null
-                                : request?.Form?.Keys.Select(key => $"{key}={request?.Form[key]}").ToList(),
+                                : request?.Form?.Keys.Select(key => $"{key}={request?.Form[key]}").ToList(),*/
                             Bytes = request?.ContentLength ?? 0,
                             Body = new HttpBodyModel
                             {
