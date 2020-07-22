@@ -104,7 +104,7 @@ namespace Serilog.Sinks.ElasticEcsLogstash.TextFormatters
                 output.Write(precedingDelimiter);
                 precedingDelimiter = ",";
 
-                JsonValueFormatter.WriteQuotedJsonString(arraySet.Key, output);
+                JsonValueFormatter.WriteQuotedJsonString(arraySet.Key.ToUnderscoreCase(), output);
                 output.Write(':');
                 output.Write('[');
                 WriteArray(arraySet.AsEnumerable(), output);

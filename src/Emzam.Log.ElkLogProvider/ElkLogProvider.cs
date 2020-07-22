@@ -32,44 +32,44 @@ namespace Emzam.Log.ElkLogProvider
         public void SetApplication(LogApplicationModel application)
             => _application = new LogApplicationModel(application);
                 
-        public void LogInformation(string category, string name, List<KeyValuePair<string, string>> payload)
+        public void LogInformation(string category, string name, Dictionary<string, string> payload)
         {
             Log(LogCategories.Information, category, name, payload: payload, severity: Severities.Low);
         }
 
-        public void LogDebug(string name, List<KeyValuePair<string, string>> payload, string category = "Default Logs")
+        public void LogDebug(string name, Dictionary<string, string> payload, string category = "Default Logs")
         {
             Log(LogCategories.Debug, category, name, payload: payload);
         }
 
-        public void LogWarning(string name, List<KeyValuePair<string, string>> payload, string category = "Default Logs")
+        public void LogWarning(string name, Dictionary<string, string> payload, string category = "Default Logs")
         {
             Log(LogCategories.Warning, category, name, payload: payload, severity: Severities.High);
         }
 
-        public void LogAudit(string name, List<KeyValuePair<string, string>> payload, string category = "Default Logs")
+        public void LogAudit(string name, Dictionary<string, string> payload, string category = "Default Logs")
         {
             Log(LogCategories.Audit, category, name, payload: payload);
         }
 
-        public void LogCritical(string name, List<KeyValuePair<string, string>> payload, string category = "Default Logs")
+        public void LogCritical(string name, Dictionary<string, string> payload, string category = "Default Logs")
         {
             Log(LogCategories.Notice, category, name, payload: payload, severity: Severities.Critical);
         }
 
-        public void LogFetal(string name, List<KeyValuePair<string, string>> payload, string category = "Default Logs")
+        public void LogFetal(string name, Dictionary<string, string> payload, string category = "Default Logs")
         {
             Log(LogCategories.Fetal, category, name, payload: payload, severity: Severities.Fetal);
         }
 
-        public void LogError(string name, Exception exception, List<KeyValuePair<string, string>> payload, string category = "Default Logs",
+        public void LogError(string name, Exception exception, Dictionary<string, string> payload, string category = "Default Logs",
             Severities severity = Severities.High)
         {
             Log(LogCategories.Error, category, name, exception, payload, severity);
         }
          
         private void Log(LogCategories category, string kind, string name, Exception exception = null, 
-            List<KeyValuePair<string, string>> payload = null, Severities severity = Severities.Normal)
+            Dictionary<string, string> payload = null, Severities severity = Severities.Normal)
         {
             if (string.IsNullOrEmpty(kind)) 
                 throw new ArgumentNullException(nameof(kind));
@@ -83,6 +83,7 @@ namespace Emzam.Log.ElkLogProvider
                 using (LogContext.PushProperty("ApplicationName", _application.Name))
                 using (LogContext.PushProperty("ApplicationType", _application.Type))
                 using (LogContext.PushProperty("ApplicationVersion", _application.Version))
+                using (LogContext.PushProperty("ServerName", _application.Server))
                 using (LogContext.PushProperty("ActionId", _application.Id))
                 using (LogContext.PushProperty("ActionCategory", category))
                 using (LogContext.PushProperty("ActionKind", kind))

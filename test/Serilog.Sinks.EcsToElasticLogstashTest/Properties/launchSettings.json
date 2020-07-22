@@ -19,7 +19,7 @@
     },
     "Serilog.Sinks.EcsToElasticLogstashCoreTest": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "weatherforecast",
       "applicationUrl": "https://localhost:7001;http://localhost:7000",
       "environmentVariables": {

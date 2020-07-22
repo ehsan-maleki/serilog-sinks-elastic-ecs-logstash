@@ -13,13 +13,13 @@ namespace Emzam.Log.ElkLogProvider
 
         void SetApplication(LogApplicationModel application);
 
-        void LogInformation(string category, string name, List<KeyValuePair<string, string>> payload);
-        void LogDebug(string name, List<KeyValuePair<string, string>> payload, string category = "Default Logs");
-        void LogWarning(string name, List<KeyValuePair<string, string>> payload, string category = "Default Logs");
-        void LogAudit(string name, List<KeyValuePair<string, string>> payload, string category = "Default Logs");
-        void LogCritical(string name, List<KeyValuePair<string, string>> payload, string category = "Default Logs");
-        void LogFetal(string name, List<KeyValuePair<string, string>> payload, string category = "Default Logs");
-        void LogError(string name, Exception exception, List<KeyValuePair<string, string>> payload, string category = "Default Logs",
+        void LogInformation(string category, string name, Dictionary<string, string> payload);
+        void LogDebug(string name, Dictionary<string, string> payload, string category = "Default Logs");
+        void LogWarning(string name, Dictionary<string, string> payload, string category = "Default Logs");
+        void LogAudit(string name, Dictionary<string, string> payload, string category = "Default Logs");
+        void LogCritical(string name, Dictionary<string, string> payload, string category = "Default Logs");
+        void LogFetal(string name, Dictionary<string, string> payload, string category = "Default Logs");
+        void LogError(string name, Exception exception, Dictionary<string, string> payload, string category = "Default Logs",
             Severities severity = Severities.High);
     }
 }

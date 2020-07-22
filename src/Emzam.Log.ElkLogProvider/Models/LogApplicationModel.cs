@@ -26,6 +26,11 @@ namespace Emzam.Log.ElkLogProvider.Models
         /// Such as: 1.0.0, 1.15.8 and etc. 
         /// </summary>
         public string Version { get; set; }
+        
+        /// <summary>
+        /// Dns name of server hosting application
+        /// </summary>
+        public string Server { get; set; }
 
         public LogApplicationModel()
         {
@@ -42,6 +47,7 @@ namespace Emzam.Log.ElkLogProvider.Models
             Name = string.IsNullOrEmpty(data.Name) ? Name : data.Name;
             Type = data.Type == ApplicationTypes.Unknown ? Type : data.Type;
             Version = string.IsNullOrEmpty(data.Version) ? Version : data.Version;
+            Server = string.IsNullOrEmpty(data.Server) ? Server : data.Server;
         }
     }
 }

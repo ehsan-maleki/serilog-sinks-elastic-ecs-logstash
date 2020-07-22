@@ -9,5 +9,9 @@
       <ProjectReference Include="..\..\src\Emzam.Log.ElkLogProvider\Emzam.Log.ElkLogProvider.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    </ItemGroup>
+
 
 </Project>

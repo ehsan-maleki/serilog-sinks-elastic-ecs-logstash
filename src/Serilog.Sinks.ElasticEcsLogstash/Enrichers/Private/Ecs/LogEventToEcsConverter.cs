@@ -1,10 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Serilog.Enrichers.Private.Ecs.Models;
 using Serilog.Events;
+using UAParser;
 
 namespace Serilog.Enrichers.Private.Ecs
 {
@@ -14,13 +19,176 @@ namespace Serilog.Enrichers.Private.Ecs
         {
             try
             {
-                var request = context.Request;
-                var headers = context.Request.Headers;
-                var response = context.Response;
+                var traceIdentifier = context.TraceIdentifier;
+                var thread = System.Threading.Thread.CurrentThread;
+                var serverName = e.Properties.ContainsKey("ServerName")
+                    ? e.Properties["ServerName"].ToString().Trim(' ', '"')
+                    : "localhost";
+
+                // host information
+                var host = new IPHostEntry
+                {
+                    HostName = serverName,
+                    Aliases = new string[] { },
+                    AddressList = new[] {new IPAddress(new byte[] {127, 0, 0, 1})}
+                };
+                try
+                {
+                    host = Dns.GetHostEntry(serverName);
+                }
+                catch
+                {
+                    // Ignore
+                }
+
+                var hostNames = host.HostName +
+                                (host.Aliases.Any() ? "," + string.Join(",", host.Aliases) : "");
+                var hostIps = host.AddressList.Any()
+                    ? string.Join(",", host.AddressList.Select(x => x.ToString()))
+                    : "";
+
                 var connection = context.Connection;
                 var error = e.Exception;
-                var user = context.User;
-                var thread = System.Threading.Thread.CurrentThread;
+
+                // Gets or sets a unique identifier to represent this connection.
+                var localIp = connection.LocalIpAddress;
+                var localPort = connection.LocalPort;
+
+                // Gets or sets a key/value collection that can be used to share data within the scope of this request.
+                var items = context.Items;
+
+                // ============================================================================
+                // Gets the HttpRequest object for this request.
+                var request = context.Request;
+                var https = request.IsHttps;
+                var method = request.Method;
+                var scheme = request.Scheme;
+                var requestBody = request.Body;
+                var canReadBody = false;
+                try
+                {
+                    canReadBody = (requestBody?.CanRead ?? false) && (requestBody?.Length ?? 0) > 0;
+                }
+                catch
+                {
+                    canReadBody = false;
+                }
+
+                var displayUrl = request.GetDisplayUrl();
+                var index1 = displayUrl.IndexOf("//", StringComparison.Ordinal) + 2;
+                var displayUrlDomain = displayUrl.Substring(index1);
+                var index2 = displayUrlDomain.IndexOf(":", StringComparison.Ordinal) > 0
+                    ? displayUrlDomain.IndexOf(":", StringComparison.Ordinal)
+                    : displayUrlDomain.IndexOf("/", StringComparison.Ordinal) > 0
+                        ? displayUrlDomain.IndexOf("/", StringComparison.Ordinal)
+                        : displayUrlDomain.Length - 1;
+                displayUrlDomain = displayUrlDomain.Substring(0, index2);
+                var encodedUrl = request.GetEncodedUrl();
+
+                var requestPath = request.Path;
+                var hasQueryString = request.QueryString.HasValue;
+                var queryStringValue = request.QueryString.Value;
+
+                var headers = context.Request.Headers;
+                var headerKeys = headers.Keys;
+                var refererHeader = headers["Referer"];
+                // =Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36
+
+                var userAgentHeader = headers["User-Agent"].ToString();
+                var uaParser = Parser.GetDefault();
+                var ua = uaParser.Parse(userAgentHeader);
+                var isMobileDevice = ua.Device.Family.ToLower() == "ios" ||
+                                     ua.Device.Family.ToLower() == "android";
+
+                // Client information
+                var clientIp = headerKeys.Contains("XX_REAL_IP")
+                    ? headers["XX_REAL_IP"].First()
+                    : headerKeys.Contains("X_REAL_IP")
+                        ? headers["X_REAL_IP"].First()
+                        : connection.RemoteIpAddress.ToString();
+                var clientPort = connection.RemotePort;
+
+                var requestContentLength = request.ContentLength ?? headers.ContentLength;
+                var requestContentType = request.ContentType;
+                var hasFormContentType = request.HasFormContentType; // Checks the Content-Type header for form types.
+
+                var hasForm = hasFormContentType && requestContentType != null && requestContentLength > 0;
+
+                List<string> formItems = null;
+                List<string> formFiles = null;
+                if (hasForm)
+                {
+                    try
+                    {
+                        var requestForm = request.Form; // Represents the parsed form values sent with the HttpRequest.
+                        var formCount = requestForm.Count; // Gets the number of elements contained in the IFormCollection.
+                        var formKeys = requestForm.Keys; // Gets an ICollection<T> containing the keys of the IFormCollection.
+                        formItems = formCount > 0 // The file collection sent with the request.
+                            ? formKeys.Select(x => $"{x}={requestForm[x]}").ToList()
+                            : null;
+                        var filesCount = requestForm.Files?.Count ?? 0;
+                        formFiles = filesCount > 0 // The file collection sent with the request.
+                            ? requestForm.Files!.Select(x => $"{x.Name}={x.Length}").ToList()
+                            : null;
+                    }
+                    catch
+                    {
+                        // Ignore
+                    }
+                }
+
+                var cookies = request.Cookies; // Represents the HttpRequest cookie collection.
+                var cookiesCount = cookies.Count; // Gets the number of elements contained in the IRequestCookieCollection.
+                var cookiesKeys = cookies.Keys; // Gets an ICollection<T> containing the keys of the IRequestCookieCollection.
+
+                // ============================================================================
+                // Gets the HttpResponse object for this request.
+                var response = context.Response;
+                var responseHasStarted = response.HasStarted;
+                var responseStatusCode = response.StatusCode;
+                var responseContentLength = response.ContentLength;
+                var responseContentType = response.ContentType;
+                var responseBody = response.Body;
+                var responseBodyCanRead = (responseBody?.CanRead ?? false) && (response?.ContentLength ?? 0) > 0;
+                var responseHeaders = response.Headers;
+                var responseCookies = response.Cookies;
+
+                // ============================================================================
+                // Gets or sets the object used to manage user session data for this request.
+                try
+                {
+                    var session = context.Session;
+                    var sessionIsAvailable = session.IsAvailable;
+                    var sessionId = session.Id;
+                    var sessionKeys = session.Keys;
+                }
+                catch
+                {
+                    // ignore
+                }
+
+
+                // ============================================================================
+                // Gets or sets the user for this request.
+                var principal = context.User;
+                var isAuthenticated = principal.Identity.IsAuthenticated;
+                var userName = principal.Identity.Name;
+                var authenticationType = principal.Identity.AuthenticationType;
+
+                var claims = principal.Claims.Any()
+                    ? string.Join(",", principal.Claims.Select(x => $"{x.Type}={x.Value}"))
+                    : null;
+
+                var payload = new List<string>();
+                var pairs = (e.Properties["ActionPayload"] as DictionaryValue)?.Elements;
+                if (pairs != null)
+                    foreach (var key in pairs.Keys)
+                    {
+                        var k = key.ToString().Trim(' ', '"');
+                        var v = pairs[key].ToString().Trim(' ', '"');
+
+                        payload.Add($"{k}={v}");
+                    }
 
                 var ecsModel = new BaseModel
                 {
@@ -29,18 +197,7 @@ namespace Serilog.Enrichers.Private.Ecs
 
                     #region -- PAYLOAD --
 
-                    Payload = e.Properties.ContainsKey("ActionPayload")
-                        // ReSharper disable once SuspiciousTypeConversion.Global
-                        ? (e.Properties["ActionPayload"] as SequenceValue)?.Elements
-                        .Select(x => x.ToString()
-                            .Replace("\"", string.Empty)
-                            .Replace("\"", string.Empty)
-                            .Replace("[", string.Empty)
-                            .Replace("]", string.Empty)
-                            .Split(','))
-                        .Select(value => $"{value[0].Trim()}={value[1].Trim()}")
-                        .ToList()
-                        : null,
+                    Payload = payload,
 
                     #endregion
 
@@ -49,16 +206,16 @@ namespace Serilog.Enrichers.Private.Ecs
                     Agent = new AgentModel
                     {
                         Id = e.Properties.ContainsKey("ApplicationId")
-                            ? e.Properties["ApplicationId"].ToString()
+                            ? e.Properties["ApplicationId"].ToString().Trim('"', ' ')
                             : null,
                         Name = e.Properties.ContainsKey("ApplicationName")
-                            ? e.Properties["ApplicationName"].ToString()
+                            ? e.Properties["ApplicationName"].ToString().Trim('"', ' ')
                             : null,
                         Type = e.Properties.ContainsKey("ApplicationType")
-                            ? e.Properties["ApplicationType"].ToString()
+                            ? e.Properties["ApplicationType"].ToString().Trim('"', ' ')
                             : null,
                         Version = e.Properties.ContainsKey("ApplicationVersion")
-                            ? e.Properties["ApplicationVersion"].ToString()
+                            ? e.Properties["ApplicationVersion"].ToString().Trim('"', ' ')
                             : null
                     },
 
@@ -68,20 +225,8 @@ namespace Serilog.Enrichers.Private.Ecs
 
                     Client = new ClientModel
                     {
-                        Address = connection?.RemoteIpAddress + ":" +
-                                  connection?.RemotePort,
-                        Ip = headers.Keys.Contains("X_REAL_IP")
-                        ? headers["X_REAL_IP"].FirstOrDefault()
-                        : connection?.RemoteIpAddress.ToString(),
-                        Bytes = request?.ContentLength ?? 0,
-                        User = string.IsNullOrEmpty(user?.Identity?.Name)
-                            ? null
-                            : new UserModel
-                            {
-                                Id = user.Identity?.Name,
-                                Name = user.Identity?.Name,
-                                Email = user.Identity?.Name
-                            }
+                        Address = clientIp,
+                        Ip = clientIp
                     },
 
                     #endregion
@@ -97,9 +242,7 @@ namespace Serilog.Enrichers.Private.Ecs
                         Action = e.Properties.ContainsKey("ActionName")
                             ? e.Properties["ActionName"].ToString().Replace("\"", "")
                             : null,
-                        Id = e.Properties.ContainsKey("ActionId")
-                            ? e.Properties["ActionId"].ToString().Replace("\"", "")
-                            : null,
+                        Id = traceIdentifier,
                         Kind = e.Properties.ContainsKey("ActionKind")
                             ? e.Properties["ActionKind"].ToString().Replace("\"", "")
                             : null,
@@ -130,27 +273,25 @@ namespace Serilog.Enrichers.Private.Ecs
 
                         Request = new HttpRequestModel
                         {
-                            Method = request?.Method,
-                            // ContentEncoding = request?.ContentEncoding?.ToString(),
-                            IsLocal = false,
-                            IsAuthenticated = !string.IsNullOrEmpty(context.User?.Identity?.Name),
-                            IsSecureConnection = request?.IsHttps,
-                            ContentType = request?.ContentType,
-                            Headers = request?.Headers.Keys.Select(key => $"{key}={request?.Headers[key]}").ToList(),
-                            // ServerVariables = request?.ServerVariables.AllKeys.Select(key => $"{key}={request?.ServerVariables[key]}").ToList(),
-                            Cookies = request?.Cookies.Keys.Select(key => $"{key}={request?.Cookies[key]}").ToList(),
-                            // Files = request?.Files?.AllKeys.ToList(),
-                            ContentLength = request?.ContentLength,
-                            /*Form = string.IsNullOrEmpty(request?.ContentType) || (request?.ContentLength ?? 0) == 0
-                                ? null
-                                : request?.Form?.Keys.Select(key => $"{key}={request?.Form[key]}").ToList(),*/
-                            Bytes = request?.ContentLength ?? 0,
+                            Method = method,
+                            IsLocal = clientIp.IndexOf("127.0.0.1", StringComparison.Ordinal) >= 0,
+                            IsAuthenticated = isAuthenticated,
+                            IsSecureConnection = https,
+                            ContentType = requestContentType,
+                            ContentLength = requestContentLength,
+                            Bytes = requestContentLength,
+
+                            Headers = headerKeys.Select(key => $"{key}={headers[key]}").ToList(),
+                            Cookies = cookiesKeys.Select(key => $"{key}={cookies[key]}").ToList(),
+                            Form = formItems,
+                            Files = formFiles,
+
                             Body = new HttpBodyModel
                             {
-                                Bytes = request?.ContentLength ?? 0,
-                                Content = (request?.ContentLength ?? 0) > 0 && (request?.Body.CanRead ?? false) ? request?.Body.ToString() : null
+                                Bytes = requestContentLength,
+                                Content = canReadBody ? requestBody.ToString() : null
                             },
-                            Referrer = request?.Headers["Referer"].ToString()
+                            Referrer = refererHeader
                         },
 
                         #endregion
@@ -159,13 +300,13 @@ namespace Serilog.Enrichers.Private.Ecs
 
                         Response = new HttpResponseModel
                         {
-                            // Bytes = 0, // response?.OutputStream.Length ?? 0,
-                            StatusCode = response?.StatusCode ?? 0 /*,
+                            Bytes = responseContentLength,
+                            StatusCode = responseStatusCode,
                             Body = new HttpBodyModel
                             {
-                                Bytes = 0, //response?.OutputStream.Length ?? 0,
-                                Content = response?.Body.ToString()
-                            }*/
+                                Bytes = responseContentLength,
+                                Content = responseBodyCanRead ? responseBody.ToString() : null
+                            }
                         }
 
                         #endregion
@@ -190,14 +331,10 @@ namespace Serilog.Enrichers.Private.Ecs
 
                     Server = new ServerModel
                     {
-                        Domain = request.Host.Host,
-                        User = e.Properties.ContainsKey("EnvironmentUserName")
-                            ? e.Properties["EnvironmentUserName"].ToString()
-                            : null,
-                        Address = e.Properties.ContainsKey("Host")
-                            ? e.Properties["Host"].ToString()
-                            : null,
-                        Ip = request.Host.Host
+                        Domain = hostNames,
+                        Address = hostNames,
+                        Ip = localIp + "," + hostIps,
+                        Port = localPort
                     },
 
                     #endregion
@@ -211,50 +348,48 @@ namespace Serilog.Enrichers.Private.Ecs
 
                     Url = new UrlModel
                     {
-                        Original = $"{request?.Host}{request?.QueryString}",
-                        Full = $"{request?.Host}{request?.QueryString}",
-                        Path = request?.Path,
-                        Scheme = request?.Scheme,
-                        Query = request?.QueryString.ToString(),
-                        Domain = request?.Host.Host,
-                        Username = user?.Identity?.Name,
-                        Port = request?.Host.Port ?? 0
+                        Original = displayUrl,
+                        Full = encodedUrl,
+                        Path = requestPath,
+                        Scheme = scheme,
+                        Query = hasQueryString ? queryStringValue : null,
+                        Username = userName,
+                        Domain = displayUrlDomain,
+                        Port = clientPort
                     },
 
                     #endregion
 
                     #region -- USER --
 
-                    User = string.IsNullOrEmpty(user?.Identity?.Name)
+                    User = !isAuthenticated
                         ? null
                         : new UserModel
                         {
-                            Id = user?.Identity?.Name,
-                            Name = user?.Identity?.Name,
-                            Email = user?.Identity?.Name
-                        } //,
+                            Id = userName,
+                            Name = userName,
+                            Hash = claims
+                        },
 
                     #endregion
 
                     #region -- USER AGENT --
 
-                    /*UserAgent = new UserAgentModel
+                    UserAgent = new UserAgentModel
                     {
-                        IsMobileDevice = request?.?.IsMobileDevice,
+                        IsMobileDevice = isMobileDevice,
                         Device = new DeviceModel
                         {
-                            Name = request?.Browser?.MobileDeviceModel,
-                            Manufacturer = request?.Browser?.MobileDeviceManufacturer
+                            Name = ua.Device.Family + " " + ua.Device.Model,
+                            Manufacturer = ua.Device.Brand
                         },
-                        Name = request?.UserAgent,
-                        Original = request?.UserAgent,
-                        Platform = request?.Browser?.Platform,
-                        ScreenPixelsWidth = request?.Browser?.ScreenPixelsWidth,
-                        ScreenPixelsHeight = request?.Browser?.ScreenPixelsHeight,
-                        IsCrawler = request?.Browser?.Crawler,
-                        Type = request?.Browser?.Type,
-                        Version = request?.Browser?.Version,
-                    }*/
+                        Name = ua.UA.Family,
+                        Original = ua.String,
+                        Platform = ua.UA.Family,
+                        IsCrawler = ua.Device.IsSpider,
+                        Type = ua.UA.Family,
+                        Version = ua.UA.Major + "." + ua.UA.Minor,
+                    }
 
                     #endregion
                 };
@@ -276,24 +411,28 @@ namespace Serilog.Enrichers.Private.Ecs
             var fullText = new StringWriter();
             var frame = new StackTrace(error, true).GetFrame(0);
 
-            fullText.WriteLine($"Exception {i++:D2} ===================================");
+            fullText.WriteLine("<div style='padding 10px; margin 0 0 30px 0;'>");
+            fullText.WriteLine($"<h3>Exception {i:D2} ===================================</h3>");
             fullText.WriteLine($"Type: {error.GetType()}");
-            fullText.WriteLine($"Source: {error.TargetSite?.DeclaringType?.AssemblyQualifiedName}");
-            fullText.WriteLine($"Message: {error.Message}");
-            fullText.WriteLine($"Trace: {error.StackTrace}");
-            fullText.WriteLine($"Location: {frame.GetFileName()}");
-            fullText.WriteLine($"Method: {frame.GetMethod()} ({frame.GetFileLineNumber()}, {frame.GetFileColumnNumber()})");
+            fullText.WriteLine($"<br />Source: {error.TargetSite?.DeclaringType?.AssemblyQualifiedName}");
+            fullText.WriteLine($"<br />Message: {error.Message}");
+            fullText.WriteLine($"<br />Trace: {error.StackTrace}");
+            fullText.WriteLine($"<br />Location: {frame.GetFileName()}");
+            fullText.WriteLine($"<br />Method: {frame.GetMethod()} ({frame.GetFileLineNumber()}, {frame.GetFileColumnNumber()})");
+            fullText.WriteLine("</div>");
 
             var exception = error.InnerException;
             while (exception != null)
             {
                 frame = new StackTrace(exception, true).GetFrame(0);
-                fullText.WriteLine($"\tException {i:D2} inner --------------------------");
-                fullText.WriteLine($"\tType: {exception.GetType()}");
-                fullText.WriteLine($"\tSource: {exception.TargetSite?.DeclaringType?.AssemblyQualifiedName}");
-                fullText.WriteLine($"\tMessage: {exception.Message}");
-                fullText.WriteLine($"\tLocation: {frame.GetFileName()}");
-                fullText.WriteLine($"\tMethod: {frame.GetMethod()} ({frame.GetFileLineNumber()}, {frame.GetFileColumnNumber()})");
+                fullText.WriteLine("<div style='padding 10px; margin 0 0 30px 30px;'>");
+                fullText.WriteLine($"<h4>Exception {i++:D2} inner --------------------------</h4>");
+                fullText.WriteLine($"Type: {exception.GetType()}");
+                fullText.WriteLine($"<br />Source: {exception.TargetSite?.DeclaringType?.AssemblyQualifiedName}");
+                fullText.WriteLine($"<br />Message: {exception.Message}");
+                fullText.WriteLine($"<br />Location: {frame.GetFileName()}");
+                fullText.WriteLine($"<br />Method: {frame.GetMethod()} ({frame.GetFileLineNumber()}, {frame.GetFileColumnNumber()})");
+                fullText.WriteLine("</div>");
 
                 exception = exception.InnerException;
             }
