@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using Emzam.Log.ElkLogProvider.Enum;
 using Emzam.Log.ElkLogProvider.Models;
-using Microsoft.AspNetCore.Http;
-using Serilog;
+using Microsoft.Extensions.Configuration;
 using Serilog.Context;
 using Serilog.Core;
 
@@ -12,107 +10,318 @@ namespace Emzam.Log.ElkLogProvider
 {
     public class ElkLogProvider : ILogProvider
     {
-        public LogApplicationModel _application { get; private set; }
+        private Logger TheLogger { get; }
+        private LogApplicationModel Application { get; set; }
 
-        public Logger _logger { get; }
-
-        public ElkLogProvider(IHttpContextAccessor context, string logstashUrl = null, 
-            LogApplicationModel application = null)
+        internal ElkLogProvider(Logger logger, LogApplicationModel application)
         {
-            _application = application ?? new LogApplicationModel();
-            
-            _logger = new LoggerConfiguration()
-                .MinimumLevel.Verbose()
-                .Enrich.FromLogContext()
-                .Enrich.WithEcs(context)
-                .WriteTo.ElasticEcsLogstash(logstashUrl ?? "http://localhost:8080")
-                .CreateLogger();
+            TheLogger = logger;
+            Application = application;
         }
 
         public void SetApplication(LogApplicationModel application)
-            => _application = new LogApplicationModel(application);
-                
-        public void LogInformation(string category, string name, Dictionary<string, string> payload)
+            => Application = new LogApplicationModel(application);
+        
+        public void SetApplication(IConfiguration configuration)
         {
-            Log(LogCategories.Information, category, name, payload: payload, severity: Severities.Low);
+            Application = new LogApplicationModel
+            {
+                Id = configuration["Logging:Application:Id"],
+                Name = configuration["Logging:Application:Name"],
+                Type = (ApplicationTypes) System.Enum.Parse(typeof(ApplicationTypes), configuration["Logging:Application:Type"]),
+                Version = configuration["Logging:Application:Version"],
+                Server = configuration["Logging:Application:Server"],
+            };
+        }    
+        
+        /// <param name="category">
+        /// Event category.
+        /// This contains high-level information about the contents of the event. It is more generic than event.action,
+        /// in the sense that typically a category contains multiple actions.
+        /// Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.
+        /// type: keyword
+        /// example: user-management
+        /// </param>
+        /// <param name="kind">
+        /// The kind of the event.
+        /// This gives information about what type of information the event contains, without being specific to the contents of the event.
+        /// Examples are event, state, alarm.
+        /// Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.
+        /// type: keyword
+        /// example: state, 
+        /// default: log, 
+        /// </param>
+        /// <param name="name">
+        /// The action captured by the event.
+        /// This describes the information in the event. It is more specific than event.category.
+        /// Examples are group-add, process-started, file-created. The value is normally defined by the implementer.
+        /// type: keyword
+        /// example: user-password-change
+        /// </param>
+        /// <param name="payload">All additional data to pass to log.</param>
+        public void LogInformation(string name, Dictionary<string, string> payload = null, string kind = "log", string category = "default-logs")
+        {
+            Log(LogLevel.Information, category, kind, name, payload: payload, severity: Severities.Low);
         }
 
-        public void LogDebug(string name, Dictionary<string, string> payload, string category = "Default Logs")
+        /// <param name="category">
+        /// Event category.
+        /// This contains high-level information about the contents of the event. It is more generic than event.action,
+        /// in the sense that typically a category contains multiple actions.
+        /// Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.
+        /// type: keyword
+        /// example: user-management
+        /// </param>
+        /// <param name="kind">
+        /// The kind of the event.
+        /// This gives information about what type of information the event contains, without being specific to the contents of the event.
+        /// Examples are event, state, alarm.
+        /// Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.
+        /// type: keyword
+        /// example: state, 
+        /// default: log, 
+        /// </param>
+        /// <param name="name">
+        /// The action captured by the event.
+        /// This describes the information in the event. It is more specific than event.category.
+        /// Examples are group-add, process-started, file-created. The value is normally defined by the implementer.
+        /// type: keyword
+        /// example: user-password-change
+        /// </param>
+        /// <param name="payload">All additional data to pass to log.</param>
+        public void LogDebug(string name, Dictionary<string, string> payload = null, string kind = "log", string category = "default-logs")
         {
-            Log(LogCategories.Debug, category, name, payload: payload);
+            Log(LogLevel.Debug, category, kind, name, payload: payload);
         }
 
-        public void LogWarning(string name, Dictionary<string, string> payload, string category = "Default Logs")
+        /// <param name="category">
+        /// Event category.
+        /// This contains high-level information about the contents of the event. It is more generic than event.action,
+        /// in the sense that typically a category contains multiple actions.
+        /// Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.
+        /// type: keyword
+        /// example: user-management
+        /// </param>
+        /// <param name="kind">
+        /// The kind of the event.
+        /// This gives information about what type of information the event contains, without being specific to the contents of the event.
+        /// Examples are event, state, alarm.
+        /// Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.
+        /// type: keyword
+        /// example: state, 
+        /// default: log, 
+        /// </param>
+        /// <param name="name">
+        /// The action captured by the event.
+        /// This describes the information in the event. It is more specific than event.category.
+        /// Examples are group-add, process-started, file-created. The value is normally defined by the implementer.
+        /// type: keyword
+        /// example: user-password-change
+        /// </param>
+        /// <param name="payload">All additional data to pass to log.</param>
+        public void LogWarning(string name, Dictionary<string, string> payload = null, string kind = "log", string category = "default-logs")
         {
-            Log(LogCategories.Warning, category, name, payload: payload, severity: Severities.High);
+            Log(LogLevel.Warning, category, kind, name, payload: payload, severity: Severities.High);
         }
 
-        public void LogAudit(string name, Dictionary<string, string> payload, string category = "Default Logs")
+        /// <param name="category">
+        /// Event category.
+        /// This contains high-level information about the contents of the event. It is more generic than event.action,
+        /// in the sense that typically a category contains multiple actions.
+        /// Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.
+        /// type: keyword
+        /// example: user-management
+        /// </param>
+        /// <param name="kind">
+        /// The kind of the event.
+        /// This gives information about what type of information the event contains, without being specific to the contents of the event.
+        /// Examples are event, state, alarm.
+        /// Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.
+        /// type: keyword
+        /// example: state, 
+        /// default: log, 
+        /// </param>
+        /// <param name="name">
+        /// The action captured by the event.
+        /// This describes the information in the event. It is more specific than event.category.
+        /// Examples are group-add, process-started, file-created. The value is normally defined by the implementer.
+        /// type: keyword
+        /// example: user-password-change
+        /// </param>
+        /// <param name="payload">All additional data to pass to log.</param>
+        public void LogAudit(string name, Dictionary<string, string> payload = null, string kind = "log", string category = "default-logs")
         {
-            Log(LogCategories.Audit, category, name, payload: payload);
+            Log(LogLevel.Audit, category, kind, name, payload: payload);
         }
 
-        public void LogCritical(string name, Dictionary<string, string> payload, string category = "Default Logs")
+        /// <param name="category">
+        /// Event category.
+        /// This contains high-level information about the contents of the event. It is more generic than event.action,
+        /// in the sense that typically a category contains multiple actions.
+        /// Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.
+        /// type: keyword
+        /// example: user-management
+        /// </param>
+        /// <param name="kind">
+        /// The kind of the event.
+        /// This gives information about what type of information the event contains, without being specific to the contents of the event.
+        /// Examples are event, state, alarm.
+        /// Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.
+        /// type: keyword
+        /// example: state, 
+        /// default: log, 
+        /// </param>
+        /// <param name="name">
+        /// The action captured by the event.
+        /// This describes the information in the event. It is more specific than event.category.
+        /// Examples are group-add, process-started, file-created. The value is normally defined by the implementer.
+        /// type: keyword
+        /// example: user-password-change
+        /// </param>
+        /// <param name="payload">All additional data to pass to log.</param>
+        public void LogCritical(string name, Dictionary<string, string> payload = null, string kind = "log", string category = "default-logs")
         {
-            Log(LogCategories.Notice, category, name, payload: payload, severity: Severities.Critical);
+            Log(LogLevel.Notice, category, kind, name, payload: payload, severity: Severities.Critical);
         }
 
-        public void LogFetal(string name, Dictionary<string, string> payload, string category = "Default Logs")
+        /// <param name="category">
+        /// Event category.
+        /// This contains high-level information about the contents of the event. It is more generic than event.action,
+        /// in the sense that typically a category contains multiple actions.
+        /// Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.
+        /// type: keyword
+        /// example: user-management
+        /// </param>
+        /// <param name="kind">
+        /// The kind of the event.
+        /// This gives information about what type of information the event contains, without being specific to the contents of the event.
+        /// Examples are event, state, alarm.
+        /// Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.
+        /// type: keyword
+        /// example: state, 
+        /// default: log, 
+        /// </param>
+        /// <param name="name">
+        /// The action captured by the event.
+        /// This describes the information in the event. It is more specific than event.category.
+        /// Examples are group-add, process-started, file-created. The value is normally defined by the implementer.
+        /// type: keyword
+        /// example: user-password-change
+        /// </param>
+        /// <param name="payload">All additional data to pass to log.</param>
+        public void LogFetal(string name, Dictionary<string, string> payload = null, string kind = "log", string category = "default-logs")
         {
-            Log(LogCategories.Fetal, category, name, payload: payload, severity: Severities.Fetal);
+            Log(LogLevel.Fetal, category, kind, name, payload: payload, severity: Severities.Fetal);
         }
 
-        public void LogError(string name, Exception exception, Dictionary<string, string> payload, string category = "Default Logs",
+        /// <param name="category">
+        /// Event category.
+        /// This contains high-level information about the contents of the event. It is more generic than event.action,
+        /// in the sense that typically a category contains multiple actions.
+        /// Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.
+        /// type: keyword
+        /// example: user-management
+        /// </param>
+        /// <param name="kind">
+        /// The kind of the event.
+        /// This gives information about what type of information the event contains, without being specific to the contents of the event.
+        /// Examples are event, state, alarm.
+        /// Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.
+        /// type: keyword
+        /// example: state, 
+        /// default: log, 
+        /// </param>
+        /// <param name="name">
+        /// The action captured by the event.
+        /// This describes the information in the event. It is more specific than event.category.
+        /// Examples are group-add, process-started, file-created. The value is normally defined by the implementer.
+        /// type: keyword
+        /// example: user-password-change
+        /// </param>
+        /// <param name="exception">Exception object.</param>
+        /// <param name="payload">All additional data to pass to log.</param>
+        /// <param name="severity">Level of importance.</param>
+        public void LogError(string name, Exception exception, Dictionary<string, string> payload = null, string kind = "log", string category = "default-logs",
             Severities severity = Severities.High)
         {
-            Log(LogCategories.Error, category, name, exception, payload, severity);
+            Log(LogLevel.Error, category, kind, name, exception, payload, severity);
         }
-         
-        private void Log(LogCategories category, string kind, string name, Exception exception = null, 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="level">User LogLevel enum.</param>
+        /// <param name="category">
+        /// Event category.
+        /// This contains high-level information about the contents of the event. It is more generic than event.action,
+        /// in the sense that typically a category contains multiple actions.
+        /// Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.
+        /// type: keyword
+        /// example: user-management
+        /// </param>
+        /// <param name="kind">
+        /// The kind of the event.
+        /// This gives information about what type of information the event contains, without being specific to the contents of the event.
+        /// Examples are event, state, alarm.
+        /// Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.
+        /// type: keyword
+        /// example: state, 
+        /// default: log, 
+        /// </param>
+        /// <param name="name">
+        /// The action captured by the event.
+        /// This describes the information in the event. It is more specific than event.category.
+        /// Examples are group-add, process-started, file-created. The value is normally defined by the implementer.
+        /// type: keyword
+        /// example: user-password-change
+        /// </param>
+        /// <param name="exception">Exception object.</param>
+        /// <param name="payload">All additional data to pass to log.</param>
+        /// <param name="severity">Level of importance.</param>
+        private void Log(LogLevel level, string category, string kind, string name, Exception exception = null,
             Dictionary<string, string> payload = null, Severities severity = Severities.Normal)
         {
-            if (string.IsNullOrEmpty(kind)) 
-                throw new ArgumentNullException(nameof(kind));
-            
-            if (string.IsNullOrEmpty(name)) 
-                throw new ArgumentNullException(nameof(name));
-            
+            category = string.IsNullOrWhiteSpace(category) ? "default-logs" : category;
+            kind = string.IsNullOrWhiteSpace(kind) ? "logs" : kind;
+            name = string.IsNullOrWhiteSpace(name) ? "logs" : name;
+
             try
             {
-                using (LogContext.PushProperty("ApplicationId", _application.Id))
-                using (LogContext.PushProperty("ApplicationName", _application.Name))
-                using (LogContext.PushProperty("ApplicationType", _application.Type))
-                using (LogContext.PushProperty("ApplicationVersion", _application.Version))
-                using (LogContext.PushProperty("ServerName", _application.Server))
-                using (LogContext.PushProperty("ActionId", _application.Id))
+                using (LogContext.PushProperty("ApplicationId", Application.Id))
+                using (LogContext.PushProperty("ApplicationName", Application.Name))
+                using (LogContext.PushProperty("ApplicationType", Application.Type))
+                using (LogContext.PushProperty("ApplicationVersion", Application.Version))
+                using (LogContext.PushProperty("ServerName", Application.Server))
+                using (LogContext.PushProperty("ActionId", Application.Id))
+                using (LogContext.PushProperty("ActionSeverity", (int) severity))
+                using (LogContext.PushProperty("ActionLevel", level))
                 using (LogContext.PushProperty("ActionCategory", category))
                 using (LogContext.PushProperty("ActionKind", kind))
                 using (LogContext.PushProperty("ActionName", name))
-                using (LogContext.PushProperty("ActionSeverity", (int)severity))
                 using (LogContext.PushProperty("ActionPayload", payload))
                 {
-                    switch (category)
+                    switch (level)
                     {
-                        case LogCategories.Information:
-                            _logger.Information(name);
+                        case LogLevel.Information:
+                            TheLogger.Information(name);
                             break;
-                        case LogCategories.Debug:
-                            _logger.Debug(name);
+                        case LogLevel.Debug:
+                            TheLogger.Debug(name);
                             break;
-                        case LogCategories.Notice:
-                            _logger.Verbose(name);
+                        case LogLevel.Notice:
+                            TheLogger.Verbose(name);
                             break;
-                        case LogCategories.Warning:
-                            _logger.Warning(name);
+                        case LogLevel.Warning:
+                            TheLogger.Warning(name);
                             break;
-                        case LogCategories.Error:
-                            _logger.Error(exception, name);
+                        case LogLevel.Error:
+                            TheLogger.Error(exception, name);
                             break;
-                        case LogCategories.Fetal:
-                            _logger.Fatal(name);
+                        case LogLevel.Fetal:
+                            TheLogger.Fatal(name);
                             break;
-                        case LogCategories.Audit:
-                            _logger.Verbose(name);
+                        case LogLevel.Audit:
+                            TheLogger.Verbose(name);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -124,5 +333,5 @@ namespace Emzam.Log.ElkLogProvider
                 // ignored
             }
         }
-   }
+    }
 }

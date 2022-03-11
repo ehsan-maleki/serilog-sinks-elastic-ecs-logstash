@@ -14,6 +14,7 @@ namespace Serilog.Enrichers.Private.Ecs.Models
     /// </summary>
     public class EventModel
     {
+        public string Level { get; set; }
         /// <summary>
         /// The action captured by the event.
         /// This describes the information in the event. It is more specific than event.category.

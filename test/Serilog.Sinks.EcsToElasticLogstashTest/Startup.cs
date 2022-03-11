@@ -27,6 +27,7 @@ namespace Serilog.Sinks.EcsToElasticLogstashCoreTest
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddHttpContextAccessor();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         }
 

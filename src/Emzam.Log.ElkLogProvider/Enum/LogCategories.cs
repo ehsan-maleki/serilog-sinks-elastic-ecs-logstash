@@ -1,6 +1,6 @@
 namespace Emzam.Log.ElkLogProvider.Enum
 {
-    public enum LogCategories
+    public enum LogLevel
     {
         Information,
         Debug,

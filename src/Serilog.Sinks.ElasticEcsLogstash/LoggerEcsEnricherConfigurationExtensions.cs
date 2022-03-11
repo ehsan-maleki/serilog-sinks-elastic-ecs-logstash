@@ -13,7 +13,7 @@ namespace Serilog
             if (enrich == null)
                 throw new ArgumentNullException(nameof(enrich));
 
-            return enrich.With(new WithEcsEnricher(contextAccessor.HttpContext));
+            return enrich.With(new WithEcsEnricher(contextAccessor?.HttpContext));
         }
     }
 }

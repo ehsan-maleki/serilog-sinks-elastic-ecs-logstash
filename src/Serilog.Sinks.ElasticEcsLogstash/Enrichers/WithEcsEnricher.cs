@@ -11,7 +11,7 @@ namespace Serilog.Enrichers
 {
     public class WithEcsEnricher : ILogEventEnricher
     {
-        private readonly HttpContext _context;
+        private readonly HttpContext context;
 
         public WithEcsEnricher()
             : this(null)
@@ -20,14 +20,14 @@ namespace Serilog.Enrichers
 
         public WithEcsEnricher(HttpContext context)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            this.context = context;
         }
 
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
             if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
 
-            var ecsProperties = ConvertToEcs(_context, logEvent, propertyFactory);
+            var ecsProperties = ConvertToEcs(context, logEvent, propertyFactory);
 
             var properties = logEvent.Properties.Select(x => x.Key).ToList();
             foreach (var property in properties)
@@ -39,16 +39,9 @@ namespace Serilog.Enrichers
 
         private static Dictionary<string, LogEventProperty> ConvertToEcs(HttpContext context, LogEvent e, ILogEventPropertyFactory propertyFactory)
         {
-            try
-            {
-                var ecsModel = LogEventToEcsConverter.ConvertToEcs(context, e);
-                var properties = MapToDictionary(ecsModel, null, propertyFactory);
-                return properties;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+            var ecsModel = LogEventToEcsConverter.ConvertToEcs(context, e);
+            var properties = MapToDictionary(ecsModel, null, propertyFactory);
+            return properties;
         }
 
         private static Dictionary<string, LogEventProperty> MapToDictionary(object source, string name, ILogEventPropertyFactory propertyFactory)
@@ -80,10 +73,10 @@ namespace Serilog.Enrichers
                 {
                     dictionary[key] = propertyFactory.CreateProperty(key, value);
                 }
-                else if (value is IEnumerable)
+                else if (value is IEnumerable enumerable)
                 {
                     var i = 0;
-                    foreach (var o in (IEnumerable) value)
+                    foreach (var o in enumerable)
                     {
                         if (o is string || o is DateTime || o is DateTimeOffset)
                         {

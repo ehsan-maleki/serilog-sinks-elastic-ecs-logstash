@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Serilog.Enrichers.Private.Ecs.Models
 {
     /// <summary>
@@ -5,10 +7,10 @@ namespace Serilog.Enrichers.Private.Ecs.Models
     /// </summary>
     public class HttpModel
     {
-        public HttpRequestModel Request { get; set; }       
-       
-        public HttpResponseModel Response { get; set; }       
-       
-        public string Version { get; set; }       
+        public List<string> Items { get; set; }       
+        public HttpRequestModel Request { get; set; }
+        public HttpResponseModel Response { get; set; }
+
+        public string Version { get; set; } = "1.1";
     }
 }

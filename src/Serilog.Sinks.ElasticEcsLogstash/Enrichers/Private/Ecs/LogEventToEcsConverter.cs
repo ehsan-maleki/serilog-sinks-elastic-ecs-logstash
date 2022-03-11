@@ -4,12 +4,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Serilog.Enrichers.Private.Ecs.Models;
 using Serilog.Events;
 using UAParser;
+// ReSharper disable ClassNeverInstantiated.Global
 
 namespace Serilog.Enrichers.Private.Ecs
 {
@@ -19,7 +19,7 @@ namespace Serilog.Enrichers.Private.Ecs
         {
             try
             {
-                var traceIdentifier = context.TraceIdentifier;
+                var traceIdentifier = context?.TraceIdentifier ?? Guid.NewGuid().ToString();
                 var thread = System.Threading.Thread.CurrentThread;
                 var serverName = e.Properties.ContainsKey("ServerName")
                     ? e.Properties["ServerName"].ToString().Trim(' ', '"')
@@ -47,70 +47,62 @@ namespace Serilog.Enrichers.Private.Ecs
                     ? string.Join(",", host.AddressList.Select(x => x.ToString()))
                     : "";
 
-                var connection = context.Connection;
+                var connection = context?.Connection;
                 var error = e.Exception;
 
                 // Gets or sets a unique identifier to represent this connection.
-                var localIp = connection.LocalIpAddress;
-                var localPort = connection.LocalPort;
+                var localIp = connection?.LocalIpAddress ?? IPAddress.Loopback;
+                var localPort = connection?.LocalPort ?? 80;
 
                 // Gets or sets a key/value collection that can be used to share data within the scope of this request.
-                var items = context.Items;
+                var items = context?.Items ?? new Dictionary<object, object>();
 
                 // ============================================================================
                 // Gets the HttpRequest object for this request.
-                var request = context.Request;
-                var https = request.IsHttps;
-                var method = request.Method;
-                var scheme = request.Scheme;
-                var requestBody = request.Body;
-                var canReadBody = false;
-                try
+                var request = context?.Request;
+                var https = request?.IsHttps ?? false;
+                var method = request?.Method ?? "None";
+                var scheme = request?.Scheme ?? "None";
+
+                var displayUrl = request?.GetDisplayUrl() ?? string.Empty;
+                var displayUrlDomain = string.Empty;
+                if (!string.IsNullOrWhiteSpace(displayUrl))
                 {
-                    canReadBody = (requestBody?.CanRead ?? false) && (requestBody?.Length ?? 0) > 0;
+                    var index1 = displayUrl.IndexOf("//", StringComparison.Ordinal) + 2;
+                    displayUrlDomain = displayUrl.Substring(index1);
+                    var index2 = displayUrlDomain.IndexOf(":", StringComparison.Ordinal) > 0
+                        ? displayUrlDomain.IndexOf(":", StringComparison.Ordinal)
+                        : displayUrlDomain.IndexOf("/", StringComparison.Ordinal) > 0
+                            ? displayUrlDomain.IndexOf("/", StringComparison.Ordinal)
+                            : displayUrlDomain.Length - 1;
+                    displayUrlDomain = displayUrlDomain.Substring(0, index2);
                 }
-                catch
-                {
-                    canReadBody = false;
-                }
 
-                var displayUrl = request.GetDisplayUrl();
-                var index1 = displayUrl.IndexOf("//", StringComparison.Ordinal) + 2;
-                var displayUrlDomain = displayUrl.Substring(index1);
-                var index2 = displayUrlDomain.IndexOf(":", StringComparison.Ordinal) > 0
-                    ? displayUrlDomain.IndexOf(":", StringComparison.Ordinal)
-                    : displayUrlDomain.IndexOf("/", StringComparison.Ordinal) > 0
-                        ? displayUrlDomain.IndexOf("/", StringComparison.Ordinal)
-                        : displayUrlDomain.Length - 1;
-                displayUrlDomain = displayUrlDomain.Substring(0, index2);
-                var encodedUrl = request.GetEncodedUrl();
+                var encodedUrl = request?.GetEncodedUrl() ?? string.Empty;
+                var requestPath = request?.Path ?? string.Empty;
+                var hasQueryString = request?.QueryString.HasValue ?? false;
+                var queryStringValue = request?.QueryString.Value ?? string.Empty;
 
-                var requestPath = request.Path;
-                var hasQueryString = request.QueryString.HasValue;
-                var queryStringValue = request.QueryString.Value;
+                var headers = context?.Request.Headers;
+                var headerKeys = headers?.Keys ?? new List<string>();
+                var refererHeader = headers?.ContainsKey("Referer") ?? false ? headers["Referer"].ToString() : string.Empty;
 
-                var headers = context.Request.Headers;
-                var headerKeys = headers.Keys;
-                var refererHeader = headers["Referer"];
-                // =Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36
-
-                var userAgentHeader = headers["User-Agent"].ToString();
-                var uaParser = Parser.GetDefault();
-                var ua = uaParser.Parse(userAgentHeader);
-                var isMobileDevice = ua.Device.Family.ToLower() == "ios" ||
-                                     ua.Device.Family.ToLower() == "android";
+                var userAgentHeader = headers.ContainsKey("User-Agent") ? headers["User-Agent"].ToString() : string.Empty;
+                var ua = Parser.GetDefault().Parse(userAgentHeader);
+                var isMobileDevice = ua?.Device?.Family?.ToLower() == "ios" ||
+                                     ua?.Device?.Family?.ToLower() == "android";
 
                 // Client information
                 var clientIp = headerKeys.Contains("XX_REAL_IP")
                     ? headers["XX_REAL_IP"].First()
                     : headerKeys.Contains("X_REAL_IP")
                         ? headers["X_REAL_IP"].First()
-                        : connection.RemoteIpAddress.ToString();
-                var clientPort = connection.RemotePort;
+                        : connection?.RemoteIpAddress.ToString() ?? string.Empty;
+                var clientPort = connection?.RemotePort ?? 0;
 
-                var requestContentLength = request.ContentLength ?? headers.ContentLength;
-                var requestContentType = request.ContentType;
-                var hasFormContentType = request.HasFormContentType; // Checks the Content-Type header for form types.
+                var requestContentLength = request?.ContentLength ?? headers.ContentLength ?? 0;
+                var requestContentType = request?.ContentType ?? "Unknown";
+                var hasFormContentType = request?.HasFormContentType ?? false; // Checks the Content-Type header for form types.
 
                 var hasForm = hasFormContentType && requestContentType != null && requestContentLength > 0;
 
@@ -137,58 +129,35 @@ namespace Serilog.Enrichers.Private.Ecs
                     }
                 }
 
-                var cookies = request.Cookies; // Represents the HttpRequest cookie collection.
-                var cookiesCount = cookies.Count; // Gets the number of elements contained in the IRequestCookieCollection.
-                var cookiesKeys = cookies.Keys; // Gets an ICollection<T> containing the keys of the IRequestCookieCollection.
+                var cookies = request?.Cookies; // Represents the HttpRequest cookie collection.
+                var cookiesKeys = cookies?.Keys ?? new List<string>(); // Gets an ICollection<T> containing the keys of the IRequestCookieCollection.
 
                 // ============================================================================
                 // Gets the HttpResponse object for this request.
-                var response = context.Response;
-                var responseHasStarted = response.HasStarted;
-                var responseStatusCode = response.StatusCode;
-                var responseContentLength = response.ContentLength;
-                var responseContentType = response.ContentType;
-                var responseBody = response.Body;
-                var responseBodyCanRead = (responseBody?.CanRead ?? false) && (response?.ContentLength ?? 0) > 0;
-                var responseHeaders = response.Headers;
-                var responseCookies = response.Cookies;
-
-                // ============================================================================
-                // Gets or sets the object used to manage user session data for this request.
-                try
-                {
-                    var session = context.Session;
-                    var sessionIsAvailable = session.IsAvailable;
-                    var sessionId = session.Id;
-                    var sessionKeys = session.Keys;
-                }
-                catch
-                {
-                    // ignore
-                }
-
+                var response = context?.Response;
+                var responseStatusCode = response?.StatusCode ?? 0;
+                var responseContentLength = response?.ContentLength ?? 0;
 
                 // ============================================================================
                 // Gets or sets the user for this request.
-                var principal = context.User;
-                var isAuthenticated = principal.Identity.IsAuthenticated;
-                var userName = principal.Identity.Name;
-                var authenticationType = principal.Identity.AuthenticationType;
+                var principal = context?.User;
+                var isAuthenticated = principal?.Identity.IsAuthenticated ?? false;
+                var userName = principal?.Identity.Name ?? "Anonymous";
 
-                var claims = principal.Claims.Any()
+                var claims = principal?.Claims.Any() ?? false
                     ? string.Join(",", principal.Claims.Select(x => $"{x.Type}={x.Value}"))
                     : null;
 
+                // ============================================================================
+                // PAYLOAD
                 var payload = new List<string>();
                 var pairs = (e.Properties["ActionPayload"] as DictionaryValue)?.Elements;
                 if (pairs != null)
-                    foreach (var key in pairs.Keys)
-                    {
-                        var k = key.ToString().Trim(' ', '"');
-                        var v = pairs[key].ToString().Trim(' ', '"');
-
-                        payload.Add($"{k}={v}");
-                    }
+                    payload.AddRange(from key in pairs.Keys
+                        let k = key.ToString().Trim(' ', '"')
+                        let v = pairs[key].ToString().Trim(' ', '"')
+                        select $"{k}={v}"
+                    );
 
                 var ecsModel = new BaseModel
                 {
@@ -235,16 +204,19 @@ namespace Serilog.Enrichers.Private.Ecs
 
                     Event = new EventModel
                     {
+                        Id = traceIdentifier,
                         Created = DateTime.UtcNow,
+                        Level = e.Properties.ContainsKey("ActionLevel")
+                            ? e.Properties["ActionLevel"].ToString()
+                            : null,
                         Category = e.Properties.ContainsKey("ActionCategory")
                             ? e.Properties["ActionCategory"].ToString()
                             : null,
-                        Action = e.Properties.ContainsKey("ActionName")
-                            ? e.Properties["ActionName"].ToString().Replace("\"", "")
-                            : null,
-                        Id = traceIdentifier,
                         Kind = e.Properties.ContainsKey("ActionKind")
                             ? e.Properties["ActionKind"].ToString().Replace("\"", "")
+                            : null,
+                        Action = e.Properties.ContainsKey("ActionName")
+                            ? e.Properties["ActionName"].ToString().Replace("\"", "")
                             : null,
                         Severity = e.Properties.ContainsKey("ActionSeverity")
                             ? long.Parse(e.Properties["ActionSeverity"].ToString())
@@ -269,6 +241,8 @@ namespace Serilog.Enrichers.Private.Ecs
 
                     Http = new HttpModel
                     {
+                        Items = items?.Select(key => $"{key}={items[key]}").ToList(),
+
                         #region -- REQUEST --
 
                         Request = new HttpRequestModel
@@ -281,15 +255,14 @@ namespace Serilog.Enrichers.Private.Ecs
                             ContentLength = requestContentLength,
                             Bytes = requestContentLength,
 
-                            Headers = headerKeys.Select(key => $"{key}={headers[key]}").ToList(),
-                            Cookies = cookiesKeys.Select(key => $"{key}={cookies[key]}").ToList(),
+                            Headers = headerKeys?.Select(key => $"{key}={headers[key]}").ToList(),
+                            Cookies = cookiesKeys?.Select(key => $"{key}={cookies[key]}").ToList(),
                             Form = formItems,
                             Files = formFiles,
 
                             Body = new HttpBodyModel
                             {
-                                Bytes = requestContentLength,
-                                Content = canReadBody ? requestBody.ToString() : null
+                                Bytes = requestContentLength
                             },
                             Referrer = refererHeader
                         },
@@ -304,8 +277,7 @@ namespace Serilog.Enrichers.Private.Ecs
                             StatusCode = responseStatusCode,
                             Body = new HttpBodyModel
                             {
-                                Bytes = responseContentLength,
-                                Content = responseBodyCanRead ? responseBody.ToString() : null
+                                Bytes = responseContentLength
                             }
                         }
 

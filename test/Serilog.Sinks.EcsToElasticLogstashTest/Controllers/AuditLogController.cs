@@ -5,6 +5,7 @@ using Emzam.Log.ElkLogProvider.Enum;
 using Emzam.Log.ElkLogProvider.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Serilog.Sinks.EcsToElasticLogstashCoreTest.Core;
 
@@ -16,18 +17,18 @@ namespace Serilog.Sinks.EcsToElasticLogstashCoreTest.Controllers
     {
         private readonly ILogProvider logProvider;
 
-        public AuditLogController(IHttpContextAccessor httpContextAccessor)
+        public AuditLogController(IHttpContextAccessor accessor, IConfiguration configuration)
         {
-            logProvider = new ElkLogProvider(httpContextAccessor, "https://queue.netbar.org");
+            logProvider = new ElkLogConfig().CreateLogger(configuration, accessor);
         }
 
         [HttpGet, Route("fake-it")]
         public JsonResult Index()
         {
-            for (var i = 0; i < 300; i++)
+            var application = new LogApplicationModel();
+            for (var i = 0; i < 30; i++)
             {
-                LogApplicationModel application = new LogApplicationModel();
-                if (i % 100 == 0)
+                if (i % 10 == 0)
                 {
                     var app = RandomGenerator.RandomApplication();
                     application = new LogApplicationModel
@@ -53,7 +54,7 @@ namespace Serilog.Sinks.EcsToElasticLogstashCoreTest.Controllers
                     },
                     "User Authentication");
 
-                Console.WriteLine($"User <{username}> {action} is <{status}>");
+                // Console.WriteLine($"User <{username}> {action} is <{status}>");
             }
 
             return Json(true);
