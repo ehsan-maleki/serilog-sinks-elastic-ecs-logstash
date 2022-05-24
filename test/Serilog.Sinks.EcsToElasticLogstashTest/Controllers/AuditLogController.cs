@@ -54,7 +54,7 @@ namespace Serilog.Sinks.EcsToElasticLogstashCoreTest.Controllers
                     },
                     "User Authentication");
 
-                // Console.WriteLine($"User <{username}> {action} is <{status}>");
+                Console.WriteLine($"User <{username}> {action} is <{status}>");
             }
 
             return Json(true);

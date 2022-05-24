@@ -132,7 +132,9 @@ public class ElkLogConfig
         {
             WriteToLogstash = true;
             LogstashUrl = configuration["Logging:Writers:Logstash:Url"] ?? DefaultLogstashUrl;
-            config.WriteTo.Debug(LogLevel, ConsoleTemplate);
+            config.WriteTo.ElasticEcsLogstash(
+                restrictedToMinimumLevel: LogLevel,
+                requestUri: LogstashUrl ?? DefaultLogstashUrl);
         }
 
         return new ElkLogProvider(config.CreateLogger(), Application);
