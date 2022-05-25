@@ -4,7 +4,7 @@
         <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageId>Emzam.Log.ElkLogProvider</PackageId>
-        <PackageVersion>1.5.8</PackageVersion>
+        <PackageVersion>1.5.9</PackageVersion>
         <Title>ELK Professional Logging Tools</Title>
         <Authors>Ehsan Maleki Zoeram</Authors>
         <Description>You can log everything to ElasticSearch using ECS schema and logstash.</Description>
@@ -17,8 +17,8 @@
         <RepositoryType>git</RepositoryType>
         <PackageTags>Serilog Logstash Sink Elasticsearch ECS Enricher Http</PackageTags>
         <PackageReleaseNotes>For release notes, please see the changes log on GitHub.</PackageReleaseNotes>
-        <AssemblyVersion>1.5.8</AssemblyVersion>
-        <FileVersion>1.5.8</FileVersion>
+        <AssemblyVersion>1.5.9</AssemblyVersion>
+        <FileVersion>1.5.9</FileVersion>
         <RootNamespace>Emzam.Log.ElkLogProvider</RootNamespace>
         <LangVersion>latestmajor</LangVersion>
         <NeutralLanguage>en-US</NeutralLanguage>
