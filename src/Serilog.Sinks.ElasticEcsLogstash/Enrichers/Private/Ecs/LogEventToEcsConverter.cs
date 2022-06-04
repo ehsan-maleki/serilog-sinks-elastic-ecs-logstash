@@ -42,15 +42,6 @@ namespace Serilog.Enrichers.Private.Ecs
                 AddressList = new[] {new IPAddress(new byte[] {127, 0, 0, 1})}
             };
 
-            try
-            {
-                host = Dns.GetHostEntry(serverName);
-            }
-            catch
-            {
-                // Ignore
-            }
-
             var hostNames = host.HostName +
                             (host.Aliases.Any() ? "," + string.Join(",", host.Aliases) : "");
             var hostIps = host.AddressList.Any()
@@ -133,7 +124,7 @@ namespace Serilog.Enrichers.Private.Ecs
                 {
                     Title = thread.Name,
                     Name = thread.Name,
-                    Executable = thread.ExecutionContext.GetType().ToString(),
+                    Executable = thread.ExecutionContext?.GetType().ToString(),
                     Thread = new ThreadModel
                     {
                         Id = thread.ManagedThreadId,
