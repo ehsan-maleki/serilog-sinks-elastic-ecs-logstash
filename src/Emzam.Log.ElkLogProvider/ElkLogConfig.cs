@@ -158,9 +158,14 @@ public class ElkLogConfig
                 outputTemplate: ConsoleTemplate ?? DefaultTemplate);
 
         if (WriteToLogstash)
+        {
             config.WriteTo.ElasticEcsLogstash(
                 restrictedToMinimumLevel: LogLevel,
                 requestUri: LogstashUrl ?? DefaultLogstashUrl);
+            config.WriteTo.DurableElasticEcsLogstashUsingFileSizeRolledBuffers(
+                restrictedToMinimumLevel: LogLevel,
+                requestUri: LogstashUrl ?? DefaultLogstashUrl);
+        }
 
         return new ElkLogProvider(config.CreateLogger(), Application);
     }

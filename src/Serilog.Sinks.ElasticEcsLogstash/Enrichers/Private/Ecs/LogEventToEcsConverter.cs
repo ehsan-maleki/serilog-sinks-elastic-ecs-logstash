@@ -365,12 +365,23 @@ namespace Serilog.Enrichers.Private.Ecs
             }
             catch (Exception ex)
             {
-                ecsModel.Error = new ErrorModel
+                var error = new ErrorModel
                 {
                     Message = ex.Message,
                     StackTrace = CatchErrors(ex),
                     Code = ex.GetType().ToString()
                 };
+
+                if (ecsModel.Error == null)
+                    ecsModel.Error = error;
+                else
+                    ecsModel.Error.StackTrace +=
+                        "\n\n//////////////////////////////////////////////////////////////" +
+                        $"\nId: {error.Id}" +
+                        $"\nMessage: {error.Message}" +
+                        $"\nStackTrace: {error.StackTrace}" +
+                        $"\nCode: {error.Code}";
+
             }
 
             return ecsModel;
@@ -385,28 +396,24 @@ namespace Serilog.Enrichers.Private.Ecs
             var fullText = new StringWriter();
             var frame = new StackTrace(error, true).GetFrame(0);
 
-            fullText.WriteLine("<div style='padding 10px; margin 0 0 30px 0;'>");
-            fullText.WriteLine($"<h3>Exception {i:D2} ===================================</h3>");
-            fullText.WriteLine($"Type: {error.GetType()}");
-            fullText.WriteLine($"<br />Source: {error.TargetSite?.DeclaringType?.AssemblyQualifiedName}");
-            fullText.WriteLine($"<br />Message: {error.Message}");
-            fullText.WriteLine($"<br />Trace: {error.StackTrace}");
-            fullText.WriteLine($"<br />Location: {frame.GetFileName()}");
-            fullText.WriteLine($"<br />Method: {frame.GetMethod()} ({frame.GetFileLineNumber()}, {frame.GetFileColumnNumber()})");
-            fullText.WriteLine("</div>");
+            fullText.WriteLine($"\n\n\nException {i:D2} ===================================");
+            fullText.WriteLine($"\nType: {error.GetType()}");
+            fullText.WriteLine($"\nSource: {error.TargetSite?.DeclaringType?.AssemblyQualifiedName}");
+            fullText.WriteLine($"\nMessage: {error.Message}");
+            fullText.WriteLine($"\nTrace: {error.StackTrace}");
+            fullText.WriteLine($"\nLocation: {frame.GetFileName()}");
+            fullText.WriteLine($"\nMethod: {frame.GetMethod()} ({frame.GetFileLineNumber()}, {frame.GetFileColumnNumber()})");
 
             var exception = error.InnerException;
             while (exception != null)
             {
                 frame = new StackTrace(exception, true).GetFrame(0);
-                fullText.WriteLine("<div style='padding 10px; margin 0 0 30px 30px;'>");
-                fullText.WriteLine($"<h4>Exception {i++:D2} inner --------------------------</h4>");
-                fullText.WriteLine($"Type: {exception.GetType()}");
-                fullText.WriteLine($"<br />Source: {exception.TargetSite?.DeclaringType?.AssemblyQualifiedName}");
-                fullText.WriteLine($"<br />Message: {exception.Message}");
-                fullText.WriteLine($"<br />Location: {frame.GetFileName()}");
-                fullText.WriteLine($"<br />Method: {frame.GetMethod()} ({frame.GetFileLineNumber()}, {frame.GetFileColumnNumber()})");
-                fullText.WriteLine("</div>");
+                fullText.WriteLine($"\n\nException {i++:D2} inner --------------------------");
+                fullText.WriteLine($"\nType: {exception.GetType()}");
+                fullText.WriteLine($"\nSource: {exception.TargetSite?.DeclaringType?.AssemblyQualifiedName}");
+                fullText.WriteLine($"\nMessage: {exception.Message}");
+                fullText.WriteLine($"\nLocation: {frame.GetFileName()}");
+                fullText.WriteLine($"\nMethod: {frame.GetMethod()} ({frame.GetFileLineNumber()}, {frame.GetFileColumnNumber()})");
 
                 exception = exception.InnerException;
             }
